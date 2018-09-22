@@ -6,7 +6,7 @@ import pandas as pd
 
 from app import app
 
-from apps import cotizaciones
+from apps import cotizaciones, semaforo
 
 
 app.layout = html.Div(children=[
@@ -58,15 +58,13 @@ def render_content(tab):
     elif tab == "cases_tab":
         pass
         # return cases.layout
-    elif tab == "leads_tab":
+    elif tab == "sem_tab":
+        return semaforo.layout
         pass
         # return leads.layout
     else:
         pass
         # return opportunities.layout
-
-
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)

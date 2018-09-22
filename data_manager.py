@@ -1,16 +1,16 @@
 import pandas as pd
 import numpy as np
 import app as app
-df = pd.read_excel('cotizaciones_all.xlsx')
 
-proyectos = df.Proyecto.unique()
-options =[]
 
-for p in proyectos:
-    options.append({'label':p, 'value': p})
-options.append({'label':'Todos los Proyectos', 'value': 'TP'})
+def data_change(data):
+    if data == 'cot':
+        df = cot_all
+    else:
+        df = neg_all
 
-proyectos_values = ['TD']
+def get_categorical_columns():
+    return df.select_dtypes(include='object').columns.tolist()
 
 def generate_table(dataframe, proyecto='Todos los Proyectos', max_rows=10):
     if filter != 'Todos los Proyectos':
@@ -23,9 +23,9 @@ def generate_table(dataframe, proyecto='Todos los Proyectos', max_rows=10):
         # Body
         [html.Tr(
             [
-                html.Td(dataframe.iloc[i][col]) 
+                html.Td(dataframe.iloc[i][col])
                 for col in dataframe.columns
-            ]) 
+            ])
         for i in range(min(len(dataframe), max_rows))]
     )
 
@@ -47,7 +47,6 @@ def get_personas_cot_mean():
 def get_personas_total():
     return df.RUT.nunique()
 
-
 def get_col_group_description(df, col):
     num_cot = []
     info = dict()
@@ -59,3 +58,25 @@ def get_col_group_description(df, col):
     info['mean'] = cot_serie.mean()
     info['std'] = cot_serie.std()
     return info
+
+cot_all = pd.read_excel('cotizaciones_all.xlsx')
+neg_all = pd.read_excel('negocios_all.xlsx')
+
+df = cot_all
+
+#Proyectos Options
+proyectos = df.Proyecto.unique()
+proyects_options = [{'label': x, 'value':x} for x in proyectos]
+proyects_options.append({'label':'Todos los Proyectos', 'value': 'TP'})
+
+#for p in proyectos:
+#    proyects_options.append({'label':p, 'value': p})
+#proyects_options.append({'label':'Todos los Proyectos', 'value': 'TP'})
+
+# Categorical Options
+categorical_columns = get_categorical_columns()
+cat_options = [{'label': col, 'value': col} for col in categorical_columns]
+
+#for col in categorical_columns:
+#   cat_options.append({'label': col, 'value': col})
+
