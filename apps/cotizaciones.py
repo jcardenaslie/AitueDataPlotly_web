@@ -191,7 +191,7 @@ layout = [
                         id="data_dropdown",
                         options=[{'label': 'Cotizaciones', 'value': 'cot'},
                                  {'label': 'Negocios', 'value': 'neg'}],
-                        value="TD",
+                        value="cot",
                         clearable=False,
                     ),
                     className="two columns",
@@ -202,7 +202,7 @@ layout = [
                     dcc.Dropdown(
                         id="proyectos_dropdown",
                         options=dm.proyects_options,
-                        value="TD",
+                        value="TP",
                         clearable=False,
                     ),
                     className="two columns",
