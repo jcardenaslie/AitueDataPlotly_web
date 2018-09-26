@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="13f1c119-83d2-462c-b4d3-aa45e02771ef" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/apps/cotizaciones.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/cotizaciones.py" afterDir="false" />
-    </list>
+    <list default="true" id="13f1c119-83d2-462c-b4d3-aa45e02771ef" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -14,11 +12,12 @@
     <session id="-1521215200">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="3" />
+          <entry key="project.closed" value="4" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.3" value="1" />
-          <entry key="project.opened" value="3" />
+          <entry key="project.open.time.4" value="1" />
+          <entry key="project.opened" value="4" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -52,7 +51,6 @@
               <caret line="332" column="47" selection-start-line="332" selection-start-column="47" selection-end-line="332" selection-end-column="47" />
               <folding>
                 <element signature="e#439#16688#0" />
-                <element signature="e#20001#28336#0" />
               </folding>
             </state>
           </provider>
@@ -61,20 +59,10 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/apps/cotizaciones.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="132">
-              <caret line="358" lean-forward="true" selection-start-line="358" selection-end-line="358" />
+            <state relative-caret-position="251">
+              <caret line="365" column="46" lean-forward="true" selection-start-line="365" selection-start-column="46" selection-end-line="365" selection-end-column="46" />
               <folding>
                 <element signature="e#24#35#0" expanded="true" />
-                <element signature="e#533#998#0" />
-                <element signature="e#1055#2582#0" />
-                <element signature="e#2620#3542#0" />
-                <element signature="e#3858#5252#0" />
-                <element signature="e#4066#4258#0" />
-                <element signature="e#5852#6300#0" />
-                <element signature="e#7546#8219#0" />
-                <element signature="e#7110#7991#0" />
-                <element signature="e#8268#8317#0" />
-                <element signature="e#8527#8557#0" />
                 <marker date="1537588261660" expanded="true" signature="9510:9662" ph="..." />
                 <marker date="1537588261660" expanded="true" signature="11154:11159" ph="..." />
               </folding>
@@ -109,17 +97,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/data_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="680">
+            <state relative-caret-position="1275">
               <caret line="79" selection-start-line="79" selection-end-line="79" />
               <folding>
                 <element signature="e#0#19#0" expanded="true" />
                 <element signature="e#86#155#0" />
-                <element signature="e#323#752#0" />
-                <element signature="e#781#914#0" />
-                <element signature="e#948#966#0" />
-                <element signature="e#1001#1136#0" />
-                <element signature="e#1168#1191#0" />
-                <element signature="e#1237#1536#0" />
               </folding>
             </state>
           </provider>
@@ -230,7 +212,6 @@
           <caret line="332" column="47" selection-start-line="332" selection-start-column="47" selection-end-line="332" selection-end-column="47" />
           <folding>
             <element signature="e#439#16688#0" />
-            <element signature="e#20001#28336#0" />
           </folding>
         </state>
       </provider>
@@ -257,37 +238,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/data_manager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="680">
+        <state relative-caret-position="1275">
           <caret line="79" selection-start-line="79" selection-end-line="79" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
             <element signature="e#86#155#0" />
-            <element signature="e#323#752#0" />
-            <element signature="e#781#914#0" />
-            <element signature="e#948#966#0" />
-            <element signature="e#1001#1136#0" />
-            <element signature="e#1168#1191#0" />
-            <element signature="e#1237#1536#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/apps/cotizaciones.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="358" lean-forward="true" selection-start-line="358" selection-end-line="358" />
+        <state relative-caret-position="251">
+          <caret line="365" column="46" lean-forward="true" selection-start-line="365" selection-start-column="46" selection-end-line="365" selection-end-column="46" />
           <folding>
             <element signature="e#24#35#0" expanded="true" />
-            <element signature="e#533#998#0" />
-            <element signature="e#1055#2582#0" />
-            <element signature="e#2620#3542#0" />
-            <element signature="e#3858#5252#0" />
-            <element signature="e#4066#4258#0" />
-            <element signature="e#5852#6300#0" />
-            <element signature="e#7546#8219#0" />
-            <element signature="e#7110#7991#0" />
-            <element signature="e#8268#8317#0" />
-            <element signature="e#8527#8557#0" />
             <marker date="1537588261660" expanded="true" signature="9510:9662" ph="..." />
             <marker date="1537588261660" expanded="true" signature="11154:11159" ph="..." />
           </folding>
