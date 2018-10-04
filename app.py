@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 
 app = dash.Dash(__name__)
 app.config.suppress_callback_exceptions = True
-
+server = app.server
 
 #  Layouts
 layout_table = dict(

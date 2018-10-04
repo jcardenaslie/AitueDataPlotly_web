@@ -6,10 +6,11 @@ import app as app
 def data_change(data):
     if data == 'cot':
         df = cot_all
-    else:
+    elif data=='neg':
         df = neg_all
+    return df
 
-def get_categorical_columns():
+def get_categorical_columns(df):
     return df.select_dtypes(include='object').columns.tolist()
 
 def generate_table(dataframe, proyecto='Todos los Proyectos', max_rows=10):
@@ -35,16 +36,16 @@ def get_data(columns):
         map_aux = map_aux[map_aux['Proyecto'].isin(columns)]
     return map_aux
 
-def get_nro_cotizaciones():
+def get_filas_data(df):
     return df.shape[0]
 
-def get_personas_cot_mean():
+def get_personas_cot_mean(df):
     num_cot = []
     for group, frame in df.groupby('RUT'):
         num_cot.append(frame.shape[0])
     return app.millify(np.mean(num_cot))
 
-def get_personas_total():
+def get_personas_total(df):
     return df.RUT.nunique()
 
 def get_col_group_description(df, col):
@@ -58,6 +59,8 @@ def get_col_group_description(df, col):
     info['mean'] = cot_serie.mean()
     info['std'] = cot_serie.std()
     return info
+
+
 
 cot_all = pd.read_excel('cotizaciones_all.xlsx')
 neg_all = pd.read_excel('negocios_all.xlsx')
@@ -74,7 +77,7 @@ proyects_options.append({'label':'Todos los Proyectos', 'value': 'TP'})
 #proyects_options.append({'label':'Todos los Proyectos', 'value': 'TP'})
 
 # Categorical Options
-categorical_columns = get_categorical_columns()
+categorical_columns = get_categorical_columns(df)
 cat_options = [{'label': col, 'value': col} for col in categorical_columns]
 
 #for col in categorical_columns:

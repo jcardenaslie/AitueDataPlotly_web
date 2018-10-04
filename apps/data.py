@@ -18,9 +18,9 @@ colors = {"background": "#F3F6FA", "background_div": "white"}
 
 # returns pie chart based on filters values
 # column makes the fonction reusable 
-def pie_chart(column):
+def pie_chart(df, column):
 
-    group = dm.df.groupby(column).count()
+    group = df.groupby(column).count()
     labels = group.index
     values = group.ID.tolist()
 
@@ -94,8 +94,8 @@ def cases_by_period(df, period, priority, origin):
 
     return {"data": data, "layout": layout}
 
-def bar_period_chart(periodo):
-    df = dm.df.groupby([pd.Grouper(key='Fecha Cotizacion', freq=periodo), "Proyecto"]).count()
+def bar_period_chart(periodo, df):
+    df = df.groupby([pd.Grouper(key='Fecha Cotizacion', freq=periodo), "Proyecto"]).count()
 
     dates = df.index.get_level_values('Fecha Cotizacion').unique()
     dates = [str(i) for i in dates]
@@ -126,11 +126,11 @@ def bar_period_chart(periodo):
 
     return {"data": data, "layout": layout}
 
-def categorical_columnbycolumn(column1, column2):
+def categorical_columnbycolumn(column1, column2, df):
     col1 = column1
     col2 = column2
-    col1_labels = dm.df[col1].unique().tolist()
-    col2_labels = dm.df[col2].unique().tolist()
+    col1_labels = df[col1].unique().tolist()
+    col2_labels = df[col2].unique().tolist()
 
     values = []  # list of lists
 
@@ -183,8 +183,8 @@ def categorical_columnbycolumn(column1, column2):
     return {'data':data, 'layour':layout}
 
 layout = [
-        # top controls
-        html.Div(
+    # top controls
+    html.Div(
             [
                 html.Div(
                     dcc.Dropdown(
@@ -208,12 +208,45 @@ layout = [
                     className="two columns",
                     style={},
                 ),
+                html.Div(
+                    dcc.Dropdown(
+                        id="column1_dropdown",
+                        options=dm.cat_options,
+                        value="Medio",
+                        clearable=False,
+                    ),
+                    className="two columns",
+                    style={},
+                ),
+
+                html.Div(
+                    dcc.Dropdown(
+                        id="column2_dropdown",
+                        options=dm.cat_options,
+                        value="Sexo",
+                        clearable=False,
+                    ),
+                    className="two columns",
+                    style={},
+                ),
+                html.Div(
+                dcc.Dropdown(
+                    id="period_dropdown",
+                    options=[{'label': 'Anual', 'value': 'A'},
+                             {'label': 'Trimestral', 'value': 'Q'},
+                             {'label': 'Mensual', 'value': 'M'}],
+                    value="A",
+                    clearable=False,
+                ),
+                className="two columns",
+                style={},
+            ),
             ],
             className="row",
             style={"marginBottom": "5"},
-        ),
-        # indicators div 
-        html.Div(
+    ),
+    # indicators div 
+    html.Div(
             [
                 indicator(
                     "#00cc96",
@@ -232,43 +265,43 @@ layout = [
                 ),
             ],
             className="row",
-        ),
+    ),
 
-        #Mid Controls
-        html.Div(
+    #Mid Controls
+    html.Div(
             [
-                html.Div(
-                    dcc.Dropdown(
-                        id="column1_dropdown",
-                        options=dm.cat_options,
-                        value="Medio",
-                        clearable=False,
-                    ),
-                    className="two columns",
-                    style={"marginBottom": "10", 'marginTop':'10'},
-                ),
+                # html.Div(
+                #     dcc.Dropdown(
+                #         id="column1_dropdown",
+                #         options=dm.cat_options,
+                #         value="Medio",
+                #         clearable=False,
+                #     ),
+                #     className="two columns",
+                #     style={"marginBottom": "10", 'marginTop':'10'},
+                # ),
 
-                html.Div(
-                    dcc.Dropdown(
-                        id="column2_dropdown",
-                        options=dm.cat_options,
-                        value="Sexo",
-                        clearable=False,
-                    ),
-                    className="two columns",
-                    style={"marginBottom": "10", 'marginTop':'10'},
-                ),
+                # html.Div(
+                #     dcc.Dropdown(
+                #         id="column2_dropdown",
+                #         options=dm.cat_options,
+                #         value="Sexo",
+                #         clearable=False,
+                #     ),
+                #     className="two columns",
+                #     style={"marginBottom": "10", 'marginTop':'10'},
+                # ),
             ],
             className="row",
             style={},
-        ),
+    ),
 
     html.Div(
         [
         # Single Column Chart
         html.Div(
            [
-            html.P("Cases Type"),
+            html.P("Pie Chart"),
             dcc.Graph(
                 id="cases_types",
                 config=dict(displayModeBar=False),
@@ -279,7 +312,7 @@ layout = [
         #Double Column Chart
         html.Div(
             [
-            html.P("Cases Reasons"),
+            html.P("Bar Chart"),
             dcc.Graph(
                 id="cases_reasons",
                 config=dict(displayModeBar=False),
@@ -295,18 +328,18 @@ layout = [
     # Period Controls
     html.Div(
         [
-            html.Div(
-                dcc.Dropdown(
-                    id="period_dropdown",
-                    options=[{'label': 'Anual', 'value': 'A'},
-                             {'label': 'Trimestral', 'value': 'Q'},
-                             {'label': 'Mensual', 'value': 'M'}],
-                    value="A",
-                    clearable=False,
-                ),
-                className="two columns",
-                style={"marginBottom": "10", 'marginTop':'10'},
-            ),
+            # html.Div(
+            #     dcc.Dropdown(
+            #         id="period_dropdown",
+            #         options=[{'label': 'Anual', 'value': 'A'},
+            #                  {'label': 'Trimestral', 'value': 'Q'},
+            #                  {'label': 'Mensual', 'value': 'M'}],
+            #         value="A",
+            #         clearable=False,
+            #     ),
+            #     className="two columns",
+            #     style={"marginBottom": "10", 'marginTop':'10'},
+            # ),
         ],
         className="row",
         style={},
@@ -315,7 +348,7 @@ layout = [
         [
             html.Div(
                 [
-                    html.P("Cotizaciones en el Tiempo"),
+                    html.P("Total filas en el Tiempo"),
                     dcc.Graph(
                         id="cases_by_period",
                         config=dict(displayModeBar=False),
@@ -331,11 +364,23 @@ layout = [
 ]
 
 @app.callback(
-    Output('column2_dropdown', 'options'),
-    [Input('column1_dropdown', 'value')]
+    Output('column1_dropdown', 'options'),
+    [Input('data_dropdown', 'value')]
 )
-def column2_options_callback(value):
-    tmp_columns = dm.get_categorical_columns()
+def column1_options_callback(data):
+    tmp_df = dm.data_change(data)
+    tmp_columns = dm.get_categorical_columns(tmp_df)
+    return [{'label':x, 'value':x} for x in tmp_columns]
+    #return [0]
+
+@app.callback(
+    Output('column2_dropdown', 'options'),
+    [Input('column1_dropdown', 'value'),
+    Input('data_dropdown', 'value')]
+)
+def column2_options_callback(value, data):
+    tmp_df = dm.data_change(data)
+    tmp_columns = dm.get_categorical_columns(tmp_df)
     tmp_columns.remove(value)
     return [{'label':x, 'value':x} for x in tmp_columns]
     #return [0]
@@ -343,57 +388,78 @@ def column2_options_callback(value):
 @app.callback(
     Output("left_cases_indicator", "children"), 
     [Input("proyectos_dropdown", "children"),
-    Input("proyectos_dropdown", "value")]
+    Input("proyectos_dropdown", "value"),
+    Input('data_dropdown', 'value')]
 )
-def left_cases_indicator_callback(df, value):
-    print(value)
-    return dm.get_nro_cotizaciones()
+def left_cases_indicator_callback(df, proyecto, data):
+    df_tmp = dm.data_change(data)
+    if proyecto != 'TP':
+        df_tmp = df_tmp[df_tmp['Proyecto'] == proyecto]
+    print(data, proyecto)
+    return dm.get_filas_data(df_tmp)
 
 @app.callback(
     Output("middle_cases_indicator", "children"), 
     [Input("proyectos_dropdown", "children"),
-    Input("proyectos_dropdown", "value")]
+    Input("proyectos_dropdown", "value"),
+    Input('data_dropdown', 'value')]
 )
-def middle_cases_indicator_callback(df, value):
-    return dm.get_personas_total()
+def middle_cases_indicator_callback(df, proyecto, data):
+    df_tmp = dm.data_change(data)
+    if proyecto != 'TP':
+        df_tmp = df_tmp[df_tmp['Proyecto'] == proyecto]
+    return dm.get_personas_total(df_tmp)
 
-#Cotizaciones promedio de las personas
 @app.callback(
     Output("right_cases_indicator", "children"), 
     [Input("proyectos_dropdown", "children"),
-    Input("proyectos_dropdown", "value")]
+    Input("proyectos_dropdown", "value"),
+    Input('data_dropdown', 'value')]
 )
-def right_cases_indicator_callback(df, value):
-    return dm.get_personas_cot_mean()
+def right_cases_indicator_callback(df, proyecto, data):
+    df_tmp = dm.data_change(data)
+    if proyecto != 'TP':
+        df_tmp = df_tmp[df_tmp['Proyecto'] == proyecto]
+    return dm.get_personas_cot_mean(df_tmp)
 
-
-# Descripcion de columnas
 @app.callback(
     Output("cases_types", "figure"),
     [
-        Input("proyectos_dropdown", "value"),
         Input("column1_dropdown", "value"),
+        Input('data_dropdown', 'value'),
+        Input("proyectos_dropdown", "value")
     ],
 )
-def cases_types_callback(value1, value2):
-    return pie_chart(value2)
+def cases_types_callback(vcol1, data, proyecto):
+    tmp_data = dm.data_change(data)
+    if proyecto != 'TP':
+        tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
+    return pie_chart(tmp_data, vcol1)
 
-# Cotizaciones en el tiempo
 @app.callback(
     Output("cases_by_period", "figure"),
     [
         Input("proyectos_dropdown", "value"),
         Input("period_dropdown", "value"),
+        Input('data_dropdown', 'value'),
     ],
 )
-def cases_period_callback(proyecto, periodo):
-    return bar_period_chart(periodo)
+def cases_period_callback(proyecto, periodo, data):
+    tmp_data = dm.data_change(data)
+    if proyecto != 'TP':
+        tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
+    return bar_period_chart(periodo, tmp_data)
 
 @app.callback(
     Output('cases_reasons', 'figure'),
     [Input("column1_dropdown", 'value'),
-     Input("column2_dropdown", 'value')
+     Input("column2_dropdown", 'value'),
+     Input('data_dropdown', 'value'),
+     Input("proyectos_dropdown", "value")
      ]
 )
-def cases_reasons_callback(column1, column2):
-    return categorical_columnbycolumn(column1, column2)
+def cases_reasons_callback(column1, column2, data, proyecto):
+    tmp_data = dm.data_change(data)
+    if proyecto != 'TP':
+        tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
+    return categorical_columnbycolumn(column1, column2, tmp_data)
