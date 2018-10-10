@@ -6,7 +6,7 @@ import pandas as pd
 
 from app import app
 
-from apps import data, versus
+from apps import data, versus, gain
 
 
 app.layout = html.Div(children=[
@@ -28,14 +28,12 @@ app.layout = html.Div(children=[
                 id="tabs",
                 style={"height":"20","verticalAlign":"middle"},
                 children=[
-                    dcc.Tab(
-                        # id="data_tab",
-                        label="Datos", value="data_tab"),
-                    dcc.Tab(label="Cot vs Neg", value="versus_tab"),
-                    # dcc.Tab(label="Semaforo", value="sem_tab"),
+                    dcc.Tab(id="data_tab", label="Datos", value="data_tab"),
+                    dcc.Tab(label="Cotización vs Negocios", value="versus_tab"),
+                    # dcc.Tab(label="Modelo San Andres del Valle", value="gain_tab"),
                     # dcc.Tab(label="Listas", value="lista_tab"),
                 ],
-                value="versus_tab",
+                value="data_tab",
             )
 
             ],className="row tabs_div"
@@ -52,6 +50,7 @@ app.layout = html.Div(children=[
     style={"margin": "0%"},
 )
 
+
 @app.callback(
     Output("tab_content", "children"), 
     [Input("tabs", "value")]
@@ -61,9 +60,9 @@ def render_content(tab):
         return data.layout
     elif tab == "versus_tab":
         return versus.layout
-    elif tab == "sem_tab":
+    elif tab == "gain_tab":
         pass
-        # return leads.layout
+        return gain.layout
     else:
         pass
         # return opportunities.layout

@@ -301,7 +301,7 @@ layout = [
         # Single Column Chart
         html.Div(
            [
-            html.P("Pie Chart"),
+            # html.P("Pie Chart"),
             dcc.Graph(
                 id="cases_types",
                 config=dict(displayModeBar=False),
@@ -312,7 +312,7 @@ layout = [
         #Double Column Chart
         html.Div(
             [
-            html.P("Bar Chart"),
+            # html.P("Bar Chart"),
             dcc.Graph(
                 id="cases_reasons",
                 config=dict(displayModeBar=False),
@@ -348,7 +348,7 @@ layout = [
         [
             html.Div(
                 [
-                    html.P("Total filas en el Tiempo"),
+                    # html.P("Total filas en el Tiempo"),
                     dcc.Graph(
                         id="cases_by_period",
                         config=dict(displayModeBar=False),

@@ -227,7 +227,7 @@ layout = [
         # Single Column Chart
         html.Div(
            [
-            html.P("Pie Chart"),
+            # html.P("Pie Chart"),
             dcc.Graph(
                 id="cot_graph1",
                 config=dict(displayModeBar=False),
@@ -238,7 +238,7 @@ layout = [
         #Double Column Chart
         html.Div(
             [
-            html.P("Pie Chart"),
+            # html.P("Pie Chart"),
             dcc.Graph(
                 id="neg_graph1",
                 config=dict(displayModeBar=False),
@@ -256,7 +256,7 @@ layout = [
         # Single Column Chart
         html.Div(
            [
-            html.P("Bar Chart"),
+            # html.P("Bar Chart"),
             dcc.Graph(
                 id="cot_graph2",
                 config=dict(displayModeBar=False),
@@ -267,7 +267,7 @@ layout = [
         #Double Column Chart
         html.Div(
             [
-            html.P("Bar Chart"),
+            # html.P("Bar Chart"),
             dcc.Graph(
                 id="neg_graph2",
                 config=dict(displayModeBar=False),
