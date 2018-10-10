@@ -80,3 +80,6 @@ def indicator(color, text, id_value):
         className="four columns indicator",
         
     )
+
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
