@@ -57,12 +57,14 @@ app.layout = html.Div(children=[
 )
 def render_content(tab):
     if tab == "data_tab":
-        return data.layout
+        pass
+        # return data.layout
     elif tab == "versus_tab":
-        return versus.layout
+        pass
+        # return versus.layout
     elif tab == "gain_tab":
         pass
-        return gain.layout
+        # return gain.layout
     else:
         pass
         # return opportunities.layout
