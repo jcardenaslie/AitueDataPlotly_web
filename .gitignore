@@ -29,7 +29,7 @@ venv
 build
 
 #data
-*.xlsx
+Data/*.xlsx
 
 #jupyter
 *.ipynb
