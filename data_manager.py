@@ -99,9 +99,14 @@ def get_col_group_description(df, col):
 
 
 # cot_all = pd.read_excel('Data/cotizaciones_all.xlsx')
-cot_all = pd.read_csv('Data\\cotizaciones_all_new.csv', index_col=[0])
+# cot_all = pd.read_csv('Data\\cotizaciones_all_new.csv', index_col=[0])
+# # neg_all = pd.read_excel('Data\\negocios_all.xlsx')
+# neg_all = pd.read_csv('Data\\negocios_all_new.csv', index_col=[0])
+
+# cot_all = pd.read_excel('Data/cotizaciones_all.xlsx')
+cot_all = pd.read_csv('Data/cotizaciones_all_new.csv', index_col=[0])
 # neg_all = pd.read_excel('Data\\negocios_all.xlsx')
-neg_all = pd.read_csv('Data\\negocios_all_new.csv', index_col=[0])
+neg_all = pd.read_csv('Data/negocios_all_new.csv', index_col=[0])
 
 # Cuando se trabaja con csv
 cot_all['Fecha Cotizacion'] =  pd.to_datetime(cot_all['Fecha Cotizacion'])
