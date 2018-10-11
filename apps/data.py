@@ -14,6 +14,8 @@ from plotly import graph_objs as go
 from app import app, indicator, millify, df_to_table
 import data_manager as dm
 
+from datetime import datetime as dt
+
 colors = {"background": "#F3F6FA", "background_div": "white"}
 
 # returns pie chart based on filters values
@@ -187,64 +189,118 @@ layout = [
     html.Div(
             [
                 html.Div(
-                    dcc.Dropdown(
-                        id="data_dropdown",
-                        options=[{'label': 'Cotizaciones', 'value': 'cot'},
-                                 {'label': 'Negocios', 'value': 'neg'}],
-                        value="cot",
-                        clearable=False,
+                    html.Div(
+                        html.Div(
+                            [
+                            html.P("Data:"),
+                            dcc.Dropdown(
+                                id="data_dropdown",
+                                options=[{'label': 'Cotizaciones', 'value': 'cot'},
+                                         {'label': 'Negocios', 'value': 'neg'}],
+                                value="cot",
+                                clearable=False,
+                            ), 
+                            html.P("Inmueble:"),
+                            html.Div(
+                                dcc.Dropdown(
+                                    id="inmuebles_dropdown",
+                                    options=dm.inmb_options,
+                                    value="TI",
+                                    clearable=False,
+                                ),className='twelve columns'),
+                            ]
+                            ,className='row')
+                        ,className='three columns'
                     ),
-                    className="two columns",
-                    style={},
                 ),
 
                 html.Div(
-                    dcc.Dropdown(
-                        id="proyectos_dropdown",
-                        options=dm.proyects_options,
-                        value="TP",
-                        clearable=False,
+                    html.Div(
+                        html.Div(
+                            [
+                            html.P("Proyecto:"),
+                            dcc.Dropdown(
+                                id="proyectos_dropdown",
+                                options=[{'label':'Todos', 'value':'TP'}],
+                                value="TP",
+                                clearable=False,
+                            ),
+                            html.P("Etapa:"),
+                            html.Div(
+                                dcc.Dropdown(
+                                    id="etapa_dropdown",
+                                    options=[{'label':'No disponible', 'value':'N'}],
+                                    value="N",
+                                    clearable=False,
+                                ),
+                            )
+                            ]
+                            ,className='row')
+                        ,className='three columns'
                     ),
-                    className="two columns",
-                    style={},
-                ),
-                html.Div(
-                    dcc.Dropdown(
-                        id="column1_dropdown",
-                        options=dm.cat_options,
-                        value="Medio",
-                        clearable=False,
-                    ),
-                    className="two columns",
-                    style={},
                 ),
 
                 html.Div(
-                    dcc.Dropdown(
-                        id="column2_dropdown",
-                        options=dm.cat_options,
-                        value="Sexo",
-                        clearable=False,
+                    html.Div(
+                        html.Div(
+                            [
+                            html.P("Columna 1:"),
+                            dcc.Dropdown(
+                                id="column1_dropdown",
+                                options=dm.cat_options,
+                                value="Medio",
+                                clearable=False,
+                            ), 
+                            html.P("Columna 2:"),
+                            html.Div(
+                                dcc.Dropdown(
+                                id="column2_dropdown",
+                                options=dm.cat_options,
+                                value="Sexo",
+                                clearable=False,
+                            ),className='twelve columns'),
+                            ]
+                            ,className='row')
+                        ,className='three columns'
                     ),
-                    className="two columns",
-                    style={},
                 ),
+
                 html.Div(
-                dcc.Dropdown(
-                    id="period_dropdown",
-                    options=[{'label': 'Anual', 'value': 'A'},
-                             {'label': 'Trimestral', 'value': 'Q'},
-                             {'label': 'Mensual', 'value': 'M'}],
-                    value="A",
-                    clearable=False,
+                    html.Div(
+                        html.Div(
+                            [
+                            html.P("Unidad Tiempo:"),
+                            html.Div(
+                                dcc.Dropdown(
+                                    id="period_dropdown",
+                                    options=[{'label': 'Anual', 'value': 'A'},
+                                             {'label': 'Trimestral', 'value': 'Q'},
+                                             {'label': 'Mensual', 'value': 'M'}],
+                                    value="A",
+                                    clearable=False,
+                                ),
+                            ), 
+
+                            ]
+                            ,className='row')
+                        ,className='three columns'
+                    ),
                 ),
-                className="two columns",
-                style={},
-            ),
+
+
             ],
             className="row",
             style={"marginBottom": "5"},
     ),
+
+    html.Div([
+        html.P("Periodo de Tiempo:"),
+                    dcc.DatePickerRange(
+                                    id='date-picker-range',
+                                    start_date=dt(1997, 5, 3),
+                                    end_date_placeholder_text='Select a date!'
+                                )
+                    ], className='row'),
     # indicators div 
     html.Div(
             [
@@ -363,6 +419,38 @@ layout = [
     ),
 ]
 
+# Proyectos depende de Casa y data para recuperar los datos
+@app.callback(
+    Output('proyectos_dropdown', 'options'),
+    [
+    # Input('data_dropdown', 'children'),
+    Input('data_dropdown', 'value'),
+    Input('inmuebles_dropdown', 'value')]
+    )
+def inmuebles_dropdown_callback(data, inmueble):
+    proyectos = dm.get_proyectos_in_inmueble(data, inmueble)
+    # print(proyectos)
+    return proyectos
+
+# etapa depende de inmueble y data y proyecto para recuperar los datos
+@app.callback(
+    Output('etapa_dropdown', 'options'),
+    [
+    # Input('data_dropdown', 'children'),
+    Input('data_dropdown', 'value'),
+    Input('inmuebles_dropdown', 'value'),
+    Input('proyectos_dropdown', 'value')]
+    )
+
+def etapa_dropdown_callback(data, inmueble, proyecto):
+    
+    if inmueble == 'Casa':
+        print('Casa')
+        return dm.get_etapa_in_proyecto(data, inmueble, proyecto) 
+    else:
+        return [{'label':'No disponible', 'value':'N'}] 
+
+
 @app.callback(
     Output('column1_dropdown', 'options'),
     [Input('data_dropdown', 'value')]
@@ -387,53 +475,60 @@ def column2_options_callback(value, data):
 
 @app.callback(
     Output("left_cases_indicator", "children"), 
-    [Input("proyectos_dropdown", "children"),
-    Input("proyectos_dropdown", "value"),
-    Input('data_dropdown', 'value')]
+    [Input("data_dropdown", "value"),
+    Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value')]
 )
-def left_cases_indicator_callback(df, proyecto, data):
-    df_tmp = dm.data_change(data)
-    if proyecto != 'TP':
-        df_tmp = df_tmp[df_tmp['Proyecto'] == proyecto]
-    print(data, proyecto)
-    return dm.get_filas_data(df_tmp)
+def left_cases_indicator_callback(data, inmueble, etapa, proyecto):
+    if inmueble == 'Casa':
+        return dm.get_filas_data(data, inmueble, proyecto, etapa)
+    else: 
+        return dm.get_filas_data(data, inmueble, proyecto)
 
 @app.callback(
     Output("middle_cases_indicator", "children"), 
-    [Input("proyectos_dropdown", "children"),
-    Input("proyectos_dropdown", "value"),
-    Input('data_dropdown', 'value')]
+    [Input("data_dropdown", "value"),
+    Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value')]
 )
-def middle_cases_indicator_callback(df, proyecto, data):
-    df_tmp = dm.data_change(data)
-    if proyecto != 'TP':
-        df_tmp = df_tmp[df_tmp['Proyecto'] == proyecto]
-    return dm.get_personas_total(df_tmp)
+def middle_cases_indicator_callback(data, inmueble, etapa, proyecto):
+    if inmueble == 'Casa':
+        return dm.gget_personas_total(data, inmueble, proyecto, etapa)
+    else: 
+        return dm.get_personas_total(data, inmueble, proyecto)
 
 @app.callback(
     Output("right_cases_indicator", "children"), 
-    [Input("proyectos_dropdown", "children"),
-    Input("proyectos_dropdown", "value"),
-    Input('data_dropdown', 'value')]
+    [Input("data_dropdown", "value"),
+    Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value')]
 )
-def right_cases_indicator_callback(df, proyecto, data):
-    df_tmp = dm.data_change(data)
-    if proyecto != 'TP':
-        df_tmp = df_tmp[df_tmp['Proyecto'] == proyecto]
-    return dm.get_personas_cot_mean(df_tmp)
+def right_cases_indicator_callback(data, inmueble, etapa, proyecto):
+    if inmueble == 'Casa':
+        return dm.get_personas_cot_mean(data, inmueble, proyecto, etapa)
+    else: 
+        return dm.get_personas_cot_mean(data, inmueble, proyecto)
 
 @app.callback(
     Output("cases_types", "figure"),
     [
         Input("column1_dropdown", "value"),
-        Input('data_dropdown', 'value'),
-        Input("proyectos_dropdown", "value")
+        Input("data_dropdown", "value"),
+        Input("inmuebles_dropdown", "value"),
+        Input("etapa_dropdown", "value"),
+        Input('proyectos_dropdown', 'value')
     ],
 )
-def cases_types_callback(vcol1, data, proyecto):
-    tmp_data = dm.data_change(data)
-    if proyecto != 'TP':
-        tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
+
+def cases_types_callback(vcol1, data, inmueble, etapa, proyecto):
+    if inmueble == 'Casa':
+        tmp_data = dm.get_data(data, inmueble, proyecto, etapa)
+    else: 
+        tmp_data = dm.get_data(data, inmueble, proyecto)
+
     return pie_chart(tmp_data, vcol1)
 
 @app.callback(
@@ -454,12 +549,16 @@ def cases_period_callback(proyecto, periodo, data):
     Output('cases_reasons', 'figure'),
     [Input("column1_dropdown", 'value'),
      Input("column2_dropdown", 'value'),
-     Input('data_dropdown', 'value'),
-     Input("proyectos_dropdown", "value")
+     Input("data_dropdown", "value"),
+        Input("inmuebles_dropdown", "value"),
+        Input("etapa_dropdown", "value"),
+        Input('proyectos_dropdown', 'value')
      ]
 )
-def cases_reasons_callback(column1, column2, data, proyecto):
-    tmp_data = dm.data_change(data)
-    if proyecto != 'TP':
-        tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
+def cases_reasons_callback(column1, column2, data, inmueble, etapa, proyecto):
+    if inmueble == 'Casa':
+        tmp_data = dm.get_data(data, inmueble, proyecto, etapa)
+    else: 
+        tmp_data = dm.get_data(data, inmueble, proyecto)
+    
     return categorical_columnbycolumn(column1, column2, tmp_data)

@@ -30,11 +30,11 @@ no_is_time_price = [
     'Edificio Mil610',
        'Edificio Junge']
 
-personas = pd.read_csv('personas_cotizacion8', encoding = "ISO-8859-1")
-x_train = pd.read_csv('x_train', encoding = "ISO-8859-1")
-y_train = pd.read_csv('y_train', encoding = "ISO-8859-1")
-x_test = pd.read_csv('x_test', encoding = "ISO-8859-1")
-y_test = pd.read_csv('y_test', encoding = "ISO-8859-1")
+personas = pd.read_csv('Data/personas_cotizacion8', encoding = "ISO-8859-1")
+x_train = pd.read_csv('Data/x_train', encoding = "ISO-8859-1")
+y_train = pd.read_csv('Data/y_train', encoding = "ISO-8859-1")
+x_test = pd.read_csv('Data/x_test', encoding = "ISO-8859-1")
+y_test = pd.read_csv('Data/y_test', encoding = "ISO-8859-1")
 
 
 personas['loc_comuna'] = personas['loc_comuna'].astype('category')

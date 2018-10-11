@@ -61,7 +61,7 @@ def render_content(tab):
         pass
     elif tab == "versus_tab":
         pass
-        # return versus.layout
+        return versus.layout
     elif tab == "gain_tab":
         pass
         # return gain.layout

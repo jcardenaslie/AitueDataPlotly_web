@@ -28,5 +28,8 @@ venv
 *.pyc
 build
 
+#data
+*.xlsx
+
 #jupyter
 *.ipynb
