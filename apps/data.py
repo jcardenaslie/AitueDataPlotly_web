@@ -325,22 +325,22 @@ layout = [
         # indicators div 
     html.Div(
             [
-                small_indicator(
+                indicator(
                     "#00cc96",
                     "Total Reservas",
                     "first_cases_indicator",
                 ),
-                small_indicator(
+                indicator(
                     "#119DFF",
                     "Total Promesados",
                     "second_cases_indicator",
                 ),
-                small_indicator(
+                indicator(
                     "#EF553B",
                     "Total Escrituras",
                     "third_cases_indicator",
                 ),
-                small_indicator(
+                indicator(
                     "#EF553B",
                     "Total Entregas",
                     "fourth_cases_indicator",
