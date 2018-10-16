@@ -11,7 +11,7 @@ import dash_html_components as html
 import plotly.plotly as py
 from plotly import graph_objs as go
 
-from app import app, indicator, millify, df_to_table
+from app import app, indicator, small_indicator, millify, df_to_table
 import data_manager as dm
 
 from datetime import datetime as dt
@@ -109,7 +109,6 @@ def bar_period_chart(periodo, df):
         for date in dates:
             try:
                 row = df.loc[(date, proyecto)]
-                #             print(row['Medio'])
                 proyecto_rows.append(row['Medio'])
             except Exception as e:
                 proyecto_rows.append(0)
@@ -139,7 +138,7 @@ def categorical_columnbycolumn(column1, column2, df):
     for value2 in col2_labels:
         col_values = []
         for value1 in col1_labels:
-            col_values.append(dm.df[(dm.df[col1] == value1) & (dm.df[col2] == value2)]['ID'].count())
+            col_values.append(df[(df[col1] == value1) & (df[col2] == value2)]['ID'].count())
         values.append(col_values)
 
     traces = []
@@ -229,8 +228,8 @@ layout = [
                             html.Div(
                                 dcc.Dropdown(
                                     id="etapa_dropdown",
-                                    options=[{'label':'No disponible', 'value':'N'}],
-                                    value="N",
+                                    options=[{'label':'No disponible', 'value':None}],
+                                    value=None,
                                     clearable=False,
                                 ),
                             )
@@ -306,7 +305,7 @@ layout = [
             [
                 indicator(
                     "#00cc96",
-                    "Total Cotizaciones",
+                    "Total Filas",
                     "left_cases_indicator",
                 ),
                 indicator(
@@ -316,12 +315,64 @@ layout = [
                 ),
                 indicator(
                     "#EF553B",
-                    "Promedio Cotizacion Persona",
+                    "Promedio Filas Persona",
                     "right_cases_indicator",
                 ),
             ],
             className="row",
     ),
+
+        # indicators div 
+    html.Div(
+            [
+                small_indicator(
+                    "#00cc96",
+                    "Total Reservas",
+                    "first_cases_indicator",
+                ),
+                small_indicator(
+                    "#119DFF",
+                    "Total Promesados",
+                    "second_cases_indicator",
+                ),
+                small_indicator(
+                    "#EF553B",
+                    "Total Escrituras",
+                    "third_cases_indicator",
+                ),
+                small_indicator(
+                    "#EF553B",
+                    "Total Entregas",
+                    "fourth_cases_indicator",
+                ),
+            ],
+            className="row",
+    ),
+
+    # html.Div([
+    #     html.Div([
+    #         html.Div([
+    #             html.P('P'),
+    #             html.P('P')]
+    #             ,className='three columns'
+    #         ),
+    #         html.Div([
+    #             html.P('P'),
+    #             html.P('P')]
+    #             ,className='three columns'
+    #         ),
+    #         html.Div([
+    #             html.P('P'),
+    #             html.P('P')]
+    #             ,className='three columns'
+    #         ),
+    #         html.Div([
+    #             html.P('P'),
+    #             html.P('P')]
+    #             ,className='three columns'
+    #         )]
+    #     ,className='row', style={}),
+    # ]),
 
     #Mid Controls
     html.Div(
@@ -419,6 +470,9 @@ layout = [
     ),
 ]
 
+
+###CONTROLES
+#############################################################################
 # Proyectos depende de Casa y data para recuperar los datos
 @app.callback(
     Output('proyectos_dropdown', 'options'),
@@ -429,7 +483,6 @@ layout = [
     )
 def inmuebles_dropdown_callback(data, inmueble):
     proyectos = dm.get_proyectos_in_inmueble(data, inmueble)
-    # print(proyectos)
     return proyectos
 
 # etapa depende de inmueble y data y proyecto para recuperar los datos
@@ -445,10 +498,9 @@ def inmuebles_dropdown_callback(data, inmueble):
 def etapa_dropdown_callback(data, inmueble, proyecto):
     
     if inmueble == 'Casa':
-        print('Casa')
         return dm.get_etapa_in_proyecto(data, inmueble, proyecto) 
     else:
-        return [{'label':'No disponible', 'value':'N'}] 
+        return [{'label':'No disponible', 'value':None}] 
 
 
 @app.callback(
@@ -463,16 +515,19 @@ def column1_options_callback(data):
 
 @app.callback(
     Output('column2_dropdown', 'options'),
-    [Input('column1_dropdown', 'value'),
-    Input('data_dropdown', 'value')]
+    [Input('data_dropdown', 'value'),
+    Input('column1_dropdown', 'value')
+    ]
 )
-def column2_options_callback(value, data):
+def column2_options_callback(data, value):
     tmp_df = dm.data_change(data)
     tmp_columns = dm.get_categorical_columns(tmp_df)
     tmp_columns.remove(value)
     return [{'label':x, 'value':x} for x in tmp_columns]
     #return [0]
 
+##INDICADORES
+############################################################################
 @app.callback(
     Output("left_cases_indicator", "children"), 
     [Input("data_dropdown", "value"),
@@ -495,7 +550,7 @@ def left_cases_indicator_callback(data, inmueble, etapa, proyecto):
 )
 def middle_cases_indicator_callback(data, inmueble, etapa, proyecto):
     if inmueble == 'Casa':
-        return dm.gget_personas_total(data, inmueble, proyecto, etapa)
+        return dm.get_personas_total(data, inmueble, proyecto, etapa)
     else: 
         return dm.get_personas_total(data, inmueble, proyecto)
 
@@ -513,6 +568,74 @@ def right_cases_indicator_callback(data, inmueble, etapa, proyecto):
         return dm.get_personas_cot_mean(data, inmueble, proyecto)
 
 @app.callback(
+    Output("first_cases_indicator", "children"), 
+    [Input("data_dropdown", "value"),
+    Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value')]
+)
+def first_indicator_callback(data, inmueble, etapa, proyecto):
+    if data != 'neg':
+        return []
+
+    if inmueble == 'Casa':
+        return dm.get_reservas(data, inmueble,  proyecto, etapa)
+    else: 
+        return dm.get_reservas(data, inmueble,  proyecto)
+
+@app.callback(
+    Output("second_cases_indicator", "children"), 
+    [Input("data_dropdown", "value"),
+    Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value')]
+)
+def second_indicator_callback(data, inmueble, etapa, proyecto):
+    if data != 'neg':
+        return []
+
+    if inmueble == 'Casa':
+        return dm.get_promesas(data, inmueble,  proyecto, etapa)
+    else: 
+        return dm.get_promesas(data, inmueble,  proyecto)
+
+@app.callback(
+    Output("third_cases_indicator", "children"), 
+    [Input("data_dropdown", "value"),
+    Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value')]
+)
+def third_indicator_callback(data, inmueble, etapa, proyecto):
+    if data != 'neg':
+        return []
+
+    if inmueble == 'Casa':
+        return dm.get_escrituras(data, inmueble,  proyecto, etapa)
+    else: 
+        return dm.get_escrituras(data, inmueble,  proyecto)
+
+@app.callback(
+    Output("fourth_cases_indicator", "children"), 
+    [Input("data_dropdown", "value"),
+    Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value')]
+)
+def fourth_indicator_callback(data, inmueble, etapa, proyecto):
+    if data != 'neg':
+        return []
+
+    if inmueble == 'Casa':
+        return dm.get_entregas(data, inmueble,  proyecto, etapa)
+    else: 
+        return dm.get_entregas(data, inmueble,  proyecto)
+
+
+##GRAFICOS
+#############################################################################
+# Grafico de Pie
+@app.callback(
     Output("cases_types", "figure"),
     [
         Input("column1_dropdown", "value"),
@@ -522,8 +645,7 @@ def right_cases_indicator_callback(data, inmueble, etapa, proyecto):
         Input('proyectos_dropdown', 'value')
     ],
 )
-
-def cases_types_callback(vcol1, data, inmueble, etapa, proyecto):
+def pie_chart_callback(vcol1, data, inmueble, etapa, proyecto):
     if inmueble == 'Casa':
         tmp_data = dm.get_data(data, inmueble, proyecto, etapa)
     else: 
@@ -531,6 +653,7 @@ def cases_types_callback(vcol1, data, inmueble, etapa, proyecto):
 
     return pie_chart(tmp_data, vcol1)
 
+# Grafico de barras en el tiempo
 @app.callback(
     Output("cases_by_period", "figure"),
     [
@@ -539,12 +662,13 @@ def cases_types_callback(vcol1, data, inmueble, etapa, proyecto):
         Input('data_dropdown', 'value'),
     ],
 )
-def cases_period_callback(proyecto, periodo, data):
+def data_period_callback(proyecto, periodo, data):
     tmp_data = dm.data_change(data)
     if proyecto != 'TP':
         tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
     return bar_period_chart(periodo, tmp_data)
 
+# Grafico doble columna
 @app.callback(
     Output('cases_reasons', 'figure'),
     [Input("column1_dropdown", 'value'),
@@ -555,7 +679,7 @@ def cases_period_callback(proyecto, periodo, data):
         Input('proyectos_dropdown', 'value')
      ]
 )
-def cases_reasons_callback(column1, column2, data, inmueble, etapa, proyecto):
+def columns_two_callback(column1, column2, data, inmueble, etapa, proyecto):
     if inmueble == 'Casa':
         tmp_data = dm.get_data(data, inmueble, proyecto, etapa)
     else: 

@@ -40,6 +40,7 @@ app.layout = html.Div(children=[
         ),
         
         html.Div(id="tab_content", className="row", style={"margin": "2% 3%"}),
+        html.Link(href="/static/s4.css", rel="stylesheet"),
         html.Link(href="https://use.fontawesome.com/releases/v5.2.0/css/all.css",rel="stylesheet"),
         html.Link(href="https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css",rel="stylesheet"),
         html.Link(href="https://fonts.googleapis.com/css?family=Dosis", rel="stylesheet"),

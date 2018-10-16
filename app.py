@@ -81,5 +81,20 @@ def indicator(color, text, id_value):
         
     )
 
+def small_indicator(color, text, id_value):
+    return html.Div(
+        [
+            html.P(
+                text,
+                className="twelve columns small_indicator_text"
+            ),
+            html.P(
+                id = id_value,
+                className="small_indicator_value"
+            ),
+        ],
+        className="two columns small_indicator",
+        
+    )
 # if __name__ == '__main__':
 #     app.run_server(debug=True)

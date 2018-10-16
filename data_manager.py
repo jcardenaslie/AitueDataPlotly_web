@@ -37,7 +37,7 @@ def get_proyectos_in_inmueble(data, inmueble):
     return proyectos_options
 
 def get_etapa_in_proyecto(data, inmbueble, proyecto):
-    data = get_data(data, inmueble=inmbueble, proyecto=proyecto)
+    data = get_data(data, inmbueble, proyecto)
     etapas = data.Etapa.unique()
     etapas_options = [{'label': x, 'value':x} for x in etapas]
     etapas_options.append({'label':'Todos las Etapas', 'value': 'TE'})
@@ -63,12 +63,6 @@ def generate_table(dataframe, proyecto='Todos los Proyectos', max_rows=10):
         for i in range(min(len(dataframe), max_rows))]
     )
 
-# def get_data(columns):
-#     map_aux = map_data.copy()
-#     if 'TP' not in columns:
-#         map_aux = map_aux[map_aux['Proyecto'].isin(columns)]
-#     return map_aux
-
 def get_filas_data(data, inmueble, proyecto, etapa=None):
     data = get_data(data, inmueble, proyecto, etapa)
     return data.shape[0]
@@ -78,7 +72,11 @@ def get_personas_cot_mean(data, inmueble, proyecto, etapa=None):
     num_cot = []
     for group, frame in data.groupby('RUT'):
         num_cot.append(frame.shape[0])
-    return app.millify(np.mean(num_cot))
+    
+    try:
+        return app.millify(np.mean(num_cot))
+    except ValueError:
+        return 'Error'
 
 def get_personas_total(data, inmueble, proyecto, etapa=None):
     data = get_data(data, inmueble, proyecto, etapa)
@@ -96,6 +94,28 @@ def get_col_group_description(df, col):
     info['std'] = cot_serie.std()
     return info
 
+def get_reservas(data, inmueble,  proyecto, etapa=None):
+    data = get_data(data, inmueble, proyecto, etapa)
+    data = data[data['Estado'] == 'Reservado']
+    return data.shape[0]
+
+def get_promesas(data, inmueble,  proyecto, etapa=None):
+    data = get_data(data, inmueble, proyecto, etapa)
+    data = data[data['Estado'] == 'Promesado']
+    return data.shape[0]
+
+def get_escrituras(data, inmueble,  proyecto, etapa=None):
+    data = get_data(data, inmueble, proyecto, etapa)
+    data = data[data['Estado'] == 'Escriturado']
+    return data.shape[0]
+
+def get_entregas(data, inmueble,  proyecto, etapa=None):
+    data = get_data(data, inmueble, proyecto, etapa)
+    data = data[data['Estado'] == 'Entregado']
+    return data.shape[0]
+
+
+# def get_column1(data, value):
 
 
 # cot_all = pd.read_excel('Data/cotizaciones_all.xlsx')
