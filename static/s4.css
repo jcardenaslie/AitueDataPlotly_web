@@ -73,7 +73,7 @@ body{
     border:1px solid #C8D4E3;
     border-radius: 3px;
     background-color: white;
-    height:100px;
+    height:70px;
     vertical-align:middle;
 }
 
@@ -86,7 +86,7 @@ body{
 .small_indicator_value{
     text-align:center;
     color: #2a3f5f;
-    font-size: 35px;
+    font-size: 18px;
 }
 
 .add{
