@@ -77,8 +77,7 @@ def indicator(color, text, id_value):
                 className="indicator_value"
             ),
         ],
-        className="four columns indicator",
-        
+        className="four columns indicator", 
     )
 
 def small_indicator(color, text, id_value):
@@ -93,8 +92,17 @@ def small_indicator(color, text, id_value):
                 className="ma_indicator_value"
             ),
         ],
-        className="two columns ma_indicator",
+        className="row ma_indicator",
         
     )
+
+def vertical_indicator(color, text, id_value):
+    return html.Div(
+        className='indicator',children=[
+                html.P( text, className='twelve columns indicator_text'),
+                html.P(id=id_value, className='indicator_value')
+    ]
+    )
+
 # if __name__ == '__main__':
 #     app.run_server(debug=True)

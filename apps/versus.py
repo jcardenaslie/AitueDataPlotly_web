@@ -11,6 +11,7 @@ from plotly import graph_objs as go
 
 from app import app, indicator, millify, df_to_table
 import data_manager as dm
+from datetime import datetime as dt
 
 colors = {"background": "#F3F6FA", "background_div": "white"}
 
@@ -120,7 +121,7 @@ def categorical_columnbycolumn(column1, column2, df):
         margin=dict(l=40, r=25, b=40, t=0, pad=4),
         xaxis=dict(
             tickfont=dict(
-                size=14,
+                size=10,
                 color='rgb(107, 107, 107)'
             )
         ),
@@ -136,78 +137,133 @@ def categorical_columnbycolumn(column1, column2, df):
             )
         ),
         legend=dict(
-            x=0,
+            x=1.2,
             y=1.0,
             bgcolor='rgba(255, 255, 255, 0)',
-            bordercolor='rgba(255, 255, 255, 0)'
+            bordercolor='rgba(255, 255, 255, 0)',
+            font=dict(size=16)
         ),
-        barmode='group',
+        barmode='stack',
         bargap=0.15,
         bargroupgap=0.1
     )
-    return {'data':data, 'layour':layout}
+    return {'data':data, 'layout':layout}
 
 
 layout = [
 	# top controls
     html.Div(
             [
+                # Data & Inmueble
                 html.Div(
-                    dcc.Dropdown(
-                        id="chart_type_dropdown",
-                        options=[{'label': 'Pie Chart', 'value': 'pie'},
-                                 {'label': 'Bar Chart', 'value': 'bar'}],
-                        value="pie",
-                        clearable=False,
+                    html.Div(
+                        html.Div(
+                            [
+                            html.P("Data:"),
+                            dcc.Dropdown(
+                                id="data_dropdown",
+                                options=[{'label': 'Cotizaciones', 'value': 'cot'},
+                                         {'label': 'Negocios', 'value': 'neg'}],
+                                value="cot",
+                                clearable=False,
+                            ), 
+                            html.P("Inmueble:"),
+                            html.Div(
+                                dcc.Dropdown(
+                                    id="inmuebles_dropdown",
+                                    options=dm.inmb_options,
+                                    value="TI",
+                                    clearable=False,
+                                ),className=''),
+                            ]
+                            ,className='row')
+                        ,className='two columns'
                     ),
-                    className="two columns",
-                    style={},
                 ),
+                # Proyecto & Etapa
+                html.Div(
+                    html.Div(
+                        html.Div(
+                            [
+                            html.P("Proyecto:"),
+                            dcc.Dropdown(
+                                id="proyectos_dropdown",
+                                options=[{'label':'Todos', 'value':'TP'}],
+                                value="TP",
+                                clearable=False,
+                            ),
+                            html.P("Etapa:"),
+                            html.Div(
+                                dcc.Dropdown(
+                                    id="etapa_dropdown",
+                                    options=[{'label':'No disponible', 'value':None}],
+                                    value=None,
+                                    clearable=False,
+                                ),
+                            )
+                            ]
+                            ,className='row')
+                        ,className='two columns'
+                    ),
+                ),
+                # Columnas
+                html.Div(
+                    html.Div(
+                        html.Div(
+                            [
+                            html.P("Columna 1:"),
+                            dcc.Dropdown(
+                                id="column1_dropdown",
+                                options=dm.cat_options,
+                                value="Medio",
+                                clearable=False,
+                            ), 
+                            html.P("Columna 2:"),
+                            html.Div(
+                                dcc.Dropdown(
+                                id="column2_dropdown",
+                                options=dm.cat_options,
+                                value="Sexo",
+                                clearable=False,
+                            ),className='twelve columns'),
+                            ]
+                            ,className='row')
+                        ,className='two columns'
+                    ),
+                ),
+                # Unidad Tiempo
+                html.Div(
+                    html.Div(
+                        html.Div(
+                            [
+                            html.P("Unidad Tiempo:"),
+                            html.Div(
+                                dcc.Dropdown(
+                                    id="period_dropdown",
+                                    options=[{'label': 'Anual', 'value': 'A'},
+                                             {'label': 'Trimestral', 'value': 'Q'},
+                                             {'label': 'Mensual', 'value': 'M'}],
+                                    value="A",
+                                    clearable=False,
+                                ),
+                            ), 
 
-                html.Div(
-                    dcc.Dropdown(
-                        id="proyectos_dropdown",
-                        options=dm.proyects_options,
-                        value="TP",
-                        clearable=False,
+                            ]
+                            ,className='row')
+                        ,className='two columns'
                     ),
-                    className="two columns",
-                    style={},
                 ),
-                html.Div(
-                    dcc.Dropdown(
-                        id="column1_dropdown",
-                        options=dm.cat_options,
-                        value="Medio",
-                        clearable=False,
-                    ),
-                    className="two columns",
-                    style={},
-                ),
+                # Date Picker
+                html.Div([
+                    html.P("Periodo de Tiempo:"),
+                    dcc.DatePickerRange(
+                                    id='date-picker-range',
+                                    start_date=dt(1997, 5, 3),
+                                    end_date_placeholder_text='Select a date!'
+                                )
+                    ], className='two columns'),
 
-                html.Div(
-                    dcc.Dropdown(
-                        id="column2_dropdown",
-                        options=dm.cat_options,
-                        value="Sexo",
-                        clearable=False,
-                    ),
-                    className="two columns",
-                    style={},
-                ),
-                
-                html.Div(
-                dcc.Dropdown(
-                    id="period_dropdown",
-                    options=[{'label': 'Anual', 'value': 'A'},
-                             {'label': 'Trimestral', 'value': 'Q'},
-                             {'label': 'Mensual', 'value': 'M'}],
-                    value="A",
-                    clearable=False,
-                ),
-                className="two columns",
-                style={},
-            ),
+
             ],
             className="row",
             style={"marginBottom": "5"},

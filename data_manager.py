@@ -3,7 +3,7 @@ import numpy as np
 import app as app
 
 import dash_core_components as dcc
-
+import copy
 
 
 def get_data(data, inmueble=None, proyecto=None, etapa=None):
@@ -114,6 +114,12 @@ def get_entregas(data, inmueble,  proyecto, etapa=None):
     data = data[data['Estado'] == 'Entregado']
     return data.shape[0]
 
+def get_data_whitin_dates(proyecto, etapa, fecha_ini, fecha_fin):
+    fechas = copy.deepcopy(get_data('neg', proyecto=proyecto))
+    fechas = fechas.sort_values(by='Fecha Cotizacion')  
+    fechas.set_index(pd.to_datetime(fechas['Fecha Cotizacion']), inplace=True)
+    fechas = fechas.loc[fecha_ini : fecha_fin]
+    return fechas
 
 # def get_column1(data, value):
 

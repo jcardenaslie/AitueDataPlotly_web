@@ -28,7 +28,7 @@ def pie_chart(df, column):
 
     layout = go.Layout(
         margin=dict(l=0, r=0, b=0, t=4, pad=8),
-        #legend=dict(orientation="h"),
+        legend=dict(orientation="v"),
         paper_bgcolor="white",
         plot_bgcolor="white",
     )
@@ -42,20 +42,9 @@ def pie_chart(df, column):
     return {"data": [trace], "layout": layout}
 
 def cases_by_period(df, period, priority, origin):
-    # df = df.dropna(subset=["Type", "Reason", "Origin"])
-    # stages = df["Type"].unique()
-
-    # priority filtering
-    # if priority != "all_p":
-    #     df = df[df["Priority"] == priority]
-
-    # period filtering
-
     df = dm.df
     stages = df["Proyecto"].unique()
 
-    # df["CreatedDate"] = pd.to_datetime(df["CreatedDate"], format="%Y-%m-%d")
-    
     if period == "W-MON":
         df["CreatedDate"] = pd.to_datetime(df["CreatedDate"]) - pd.to_timedelta(7, unit="d")
     
@@ -63,14 +52,6 @@ def cases_by_period(df, period, priority, origin):
     
     dates = df.index.get_level_values("CreatedDate").unique()
     dates = [str(i) for i in dates]
-    
-    # co = { # colors for stages
-    #     "Electrical": "#264e86",
-    #     "Other": "#0074e4",
-    #     "Structural": "#74dbef",
-    #     "Mechanical": "#eff0f4",
-    #     "Electronic": "rgb(255, 127, 14)",
-    # }
 
     data = []
     for stage in stages:
@@ -156,7 +137,7 @@ def categorical_columnbycolumn(column1, column2, df):
         margin=dict(l=40, r=25, b=40, t=0, pad=4),
         xaxis=dict(
             tickfont=dict(
-                size=14,
+                size=10,
                 color='rgb(107, 107, 107)'
             )
         ),
@@ -172,21 +153,23 @@ def categorical_columnbycolumn(column1, column2, df):
             )
         ),
         legend=dict(
-            x=0,
+            x=1.2,
             y=1.0,
             bgcolor='rgba(255, 255, 255, 0)',
-            bordercolor='rgba(255, 255, 255, 0)'
+            bordercolor='rgba(255, 255, 255, 0)',
+            font=dict(size=16)
         ),
         barmode='group',
         bargap=0.15,
         bargroupgap=0.1
     )
-    return {'data':data, 'layour':layout}
+    return {'data':data, 'layout':layout}
 
 layout = [
     # top controls
     html.Div(
             [
+                # Data & Inmueble
                 html.Div(
                     html.Div(
                         html.Div(
@@ -206,13 +189,13 @@ layout = [
                                     options=dm.inmb_options,
                                     value="TI",
                                     clearable=False,
-                                ),className='twelve columns'),
+                                ),className=''),
                             ]
                             ,className='row')
-                        ,className='three columns'
+                        ,className='two columns'
                     ),
                 ),
-
+                # Proyecto & Etapa
                 html.Div(
                     html.Div(
                         html.Div(
@@ -235,10 +218,10 @@ layout = [
                             )
                             ]
                             ,className='row')
-                        ,className='three columns'
+                        ,className='two columns'
                     ),
                 ),
-
+                # Columnas
                 html.Div(
                     html.Div(
                         html.Div(
@@ -260,10 +243,10 @@ layout = [
                             ),className='twelve columns'),
                             ]
                             ,className='row')
-                        ,className='three columns'
+                        ,className='two columns'
                     ),
                 ),
-
+                # Unidad Tiempo
                 html.Div(
                     html.Div(
                         html.Div(
@@ -282,9 +265,18 @@ layout = [
 
                             ]
                             ,className='row')
-                        ,className='three columns'
+                        ,className='two columns'
                     ),
                 ),
+                # Date Picker
+                html.Div([
+                    html.P("Periodo de Tiempo:"),
+                    dcc.DatePickerRange(
+                                    id='date-picker-range',
+                                    start_date=dt(1997, 5, 3),
+                                    end_date_placeholder_text='Select a date!'
+                                )
+                    ], className='two columns'),
 
 
             ],
@@ -292,14 +284,7 @@ layout = [
             style={"marginBottom": "5"},
     ),
 
-    html.Div([
-        html.P("Periodo de Tiempo:"),
-                    dcc.DatePickerRange(
-                                    id='date-picker-range',
-                                    start_date=dt(1997, 5, 3),
-                                    end_date_placeholder_text='Select a date!'
-                                )
-                    ], className='row'),
+    
     # indicators div 
     html.Div(
             [
@@ -320,87 +305,6 @@ layout = [
                 ),
             ],
             className="row",
-    ),
-
-        # indicators div 
-    html.Div(
-            [
-                indicator(
-                    "#00cc96",
-                    "Total Reservas",
-                    "first_cases_indicator",
-                ),
-                indicator(
-                    "#119DFF",
-                    "Total Promesados",
-                    "second_cases_indicator",
-                ),
-                indicator(
-                    "#EF553B",
-                    "Total Escrituras",
-                    "third_cases_indicator",
-                ),
-                indicator(
-                    "#EF553B",
-                    "Total Entregas",
-                    "fourth_cases_indicator",
-                ),
-            ],
-            className="row",
-    ),
-
-    # html.Div([
-    #     html.Div([
-    #         html.Div([
-    #             html.P('P'),
-    #             html.P('P')]
-    #             ,className='three columns'
-    #         ),
-    #         html.Div([
-    #             html.P('P'),
-    #             html.P('P')]
-    #             ,className='three columns'
-    #         ),
-    #         html.Div([
-    #             html.P('P'),
-    #             html.P('P')]
-    #             ,className='three columns'
-    #         ),
-    #         html.Div([
-    #             html.P('P'),
-    #             html.P('P')]
-    #             ,className='three columns'
-    #         )]
-    #     ,className='row', style={}),
-    # ]),
-
-    #Mid Controls
-    html.Div(
-            [
-                # html.Div(
-                #     dcc.Dropdown(
-                #         id="column1_dropdown",
-                #         options=dm.cat_options,
-                #         value="Medio",
-                #         clearable=False,
-                #     ),
-                #     className="two columns",
-                #     style={"marginBottom": "10", 'marginTop':'10'},
-                # ),
-
-                # html.Div(
-                #     dcc.Dropdown(
-                #         id="column2_dropdown",
-                #         options=dm.cat_options,
-                #         value="Sexo",
-                #         clearable=False,
-                #     ),
-                #     className="two columns",
-                #     style={"marginBottom": "10", 'marginTop':'10'},
-                # ),
-            ],
-            className="row",
-            style={},
     ),
 
     html.Div(
