@@ -39,58 +39,78 @@ def pie_chart(df, column):
     return {"data": [trace], "layout": layout}
 
 def bar_period_chart(period, proyecto):
-	cot_all = dm.data_change('cot')
-	neg_all = dm.data_change('neg')
+    cot_all = dm.data_change('cot')
+    neg_all = dm.data_change('neg')
+    comp_all = dm.data_change('comp')
 
-	if proyecto != 'TP':
-		cot_all = cot_all[cot_all['Proyecto'] == proyecto]
-		neg_all = neg_all[neg_all['Proyecto'] == proyecto]
+    if proyecto != 'TP':
+        cot_all = cot_all[cot_all['Proyecto'] == proyecto]
+        neg_all = neg_all[neg_all['Proyecto'] == proyecto]
+        comp_all = comp_all[comp_all['Proyecto'] == proyecto]
 
-	data = []
-	cot_all['count'] = 1
-	cot_all.set_index(pd.to_datetime(cot_all['Fecha Cotizacion']), inplace=True)
-	cot_fecha = cot_all.resample(period).sum()
+    data = []
+    cot_all['count'] = 1
+    cot_all.set_index(pd.to_datetime(cot_all['Fecha Cotizacion']), inplace=True)
+    cot_fecha = cot_all.resample(period).sum()
 
-	y = cot_fecha['count'].tolist()
-	x = cot_fecha.index.tolist()
+    y = cot_fecha['count'].tolist()
+    x = cot_fecha.index.tolist()
 
-	trace = go.Bar(
+    trace = go.Bar(
 	    x=x,
 	    y=y,
 	    name='Cotizaciones',
 	    marker=dict(
 	        color='rgb(55, 83, 109)'
 	    )
-	)
+    )
 
-	data.append(trace)
+    data.append(trace)
 
-	neg_all['count'] = 1
-	neg_all.set_index(pd.to_datetime(neg_all['Fecha Cotizacion']), inplace=True)
-	neg_fecha = neg_all.resample(period).sum()
+    neg_all['count'] = 1
+    neg_all.set_index(pd.to_datetime(neg_all['Fecha Cotizacion']), inplace=True)
+    neg_fecha = neg_all.resample(period).sum()
 
-	y = neg_fecha['count'].tolist()
-	x = neg_fecha.index.tolist()
+    y = neg_fecha['count'].tolist()
+    x = neg_fecha.index.tolist()
 
-	trace = go.Bar(
+    trace = go.Bar(
 	    x=x,
 	    y=y,
 	    name='Negocios',
 	    marker=dict(
 	        color='rgb(26, 118, 255)'
 	    )
-	)
+    )
 
-	data.append(trace)
+    data.append(trace)
 
-	layout = go.Layout(
+    comp_all['count'] = 1
+    comp_all.set_index(pd.to_datetime(comp_all['Fecha Cotizacion']), inplace=True)
+    comp_fecha = comp_all.resample(period).sum()
+
+    y = comp_fecha['count'].tolist()
+    x = comp_fecha.index.tolist()
+
+    trace = go.Bar(
+        x=x,
+        y=y,
+        name='Negocios',
+        marker=dict(
+            color='rgb(122, 234, 255)'
+        )
+    )
+
+    data.append(trace)
+
+    layout = go.Layout(
 	#         barmode="stack",
 	        margin=dict(l=40, r=25, b=40, t=0, pad=4),
 	        paper_bgcolor="white",
 	        plot_bgcolor="white",
 	    )
 
-	return {"data": data, "layout": layout}
+    return {"data": data, "layout": layout}
 
 def categorical_columnbycolumn(column1, column2, df):
     col1 = column1
@@ -141,7 +161,7 @@ def categorical_columnbycolumn(column1, column2, df):
             y=1.0,
             bgcolor='rgba(255, 255, 255, 0)',
             bordercolor='rgba(255, 255, 255, 0)',
-            font=dict(size=16)
+            font=dict(size=12)
         ),
         barmode='stack',
         bargap=0.15,
@@ -151,7 +171,7 @@ def categorical_columnbycolumn(column1, column2, df):
 
 
 layout = [
-	# top controls
+    # top controls
     html.Div(
             [
                 # Data & Inmueble
@@ -166,6 +186,7 @@ layout = [
                                          {'label': 'Negocios', 'value': 'neg'}],
                                 value="cot",
                                 clearable=False,
+                                disabled=True
                             ), 
                             html.P("Inmueble:"),
                             html.Div(
@@ -255,13 +276,36 @@ layout = [
                 ),
                 # Date Picker
                 html.Div([
-                    html.P("Periodo de Tiempo:"),
-                    dcc.DatePickerRange(
-                                    id='date-picker-range',
-                                    start_date=dt(1997, 5, 3),
-                                    end_date_placeholder_text='Select a date!'
+                        html.Div(
+                            [
+                                # html.P("Unidad Tiempo:"),
+                                html.Div(
+                                    dcc.RangeSlider(
+                                    id='datos_year_rangeslider',
+                                    marks={i: '{}'.format(i) for i in dm.data_years},
+                                    min=dm.date_min,
+                                    max=dm.date_max,
+                                    value=[dm.date_min, dm.date_max]
                                 )
-                    ], className='two columns'),
+                                ),                              
+                            ]
+                            ,className='row', style={'padding':'30'}),
+                        
+                    html.Div(
+                            [
+                                # html.P("Unidad Tiempo:"),
+                                html.Div(
+                                    dcc.RangeSlider(
+                                    id='datos_month_rangeslider',
+                                    marks={i: '{}'.format(j) for i, j in zip(range(1, 13), dm.months)},
+                                    min=1,
+                                    max=12,
+                                    value=[1,12]
+                                )
+                                ),                              
+                            ]
+                            ,className='row', style={'padding':'30'})
+                ],className='four columns'),
 
 
             ],
@@ -271,8 +315,9 @@ layout = [
     # Headers
 	html.Div(
     [
-    	html.H3(children='Cotizaciones',className="six columns" ),
-    	html.H3(children='Negocios',className="six columns" ),
+    	html.H3(children='Cotizaciones',className="four columns" ),
+    	html.H3(children='Negocios',className="four columns" ),
+        html.H3(children='Compras',className="four columns" ),
     ],className="row",
             style={"marginBottom": "5"},
     ),
@@ -289,7 +334,7 @@ layout = [
                 config=dict(displayModeBar=False),
                 style={"height": "89%", "width": "98%"},
             ),
-           ],className="six columns chart_div",
+           ],className="four columns chart_div",
         ),
         #Double Column Chart
         html.Div(
@@ -300,7 +345,17 @@ layout = [
                 config=dict(displayModeBar=False),
                 style={"height": "89%", "width": "98%"},
             ),
-            ],className="six columns chart_div"
+            ],className="four columns chart_div"
+        ),
+        html.Div(
+            [
+            # html.P("Pie Chart"),
+            dcc.Graph(
+                id="comp_graph1",
+                config=dict(displayModeBar=False),
+                style={"height": "89%", "width": "98%"},
+            ),
+            ],className="four columns chart_div"
         ),
     		],
     		className="row",
@@ -318,7 +373,7 @@ layout = [
                 config=dict(displayModeBar=False),
                 style={"height": "89%", "width": "98%"},
             ),
-           ],className="six columns chart_div",
+           ],className="four columns chart_div",
         ),
         #Double Column Chart
         html.Div(
@@ -329,7 +384,17 @@ layout = [
                 config=dict(displayModeBar=False),
                 style={"height": "89%", "width": "98%"},
             ),
-            ],className="six columns chart_div"
+            ],className="four columns chart_div"
+        ),
+        html.Div(
+            [
+            # html.P("Bar Chart"),
+            dcc.Graph(
+                id="comp_graph2",
+                config=dict(displayModeBar=False),
+                style={"height": "89%", "width": "98%"},
+            ),
+            ],className="four columns chart_div"
         ),
     		],
     		className="row",
@@ -356,65 +421,135 @@ layout = [
     ),
 ]
 
-
-
+######################################################################################################
+# Grafico de Pie
 @app.callback(
     Output("cot_graph1", "figure"),
     [
-    	Input("proyectos_dropdown", "children"),
-        Input("proyectos_dropdown", "value"),
         Input("column1_dropdown", "value"),
+        Input("inmuebles_dropdown", "value"),
+        Input("etapa_dropdown", "value"),
+        Input("proyectos_dropdown", "value"),
+        Input('datos_year_rangeslider', 'value'),
+        Input('datos_month_rangeslider', 'value')
     ],
 )
-def cot_graph1_callback(children, proyecto, col1):
-    tmp_data = dm.data_change('cot')
-    if proyecto != 'TP':
-        tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
-    return pie_chart(tmp_data, col1)
+def cot_pie_callback(vcol1, inmueble, etapa, proyecto, year_values, month_values):
+    if inmueble == 'Casa':
+        data = dm.get_data_whithin_dates('cot', proyecto, inmueble, year_values, month_values, etapa)
+    else: 
+        data = dm.get_data_whithin_dates('cot', proyecto, inmueble, year_values, month_values)
 
+
+    return pie_chart(data, vcol1)
+
+#PIE
+# Grafico doble columna
 @app.callback(
     Output('cot_graph2', 'figure'),
-    [
-	Input("proyectos_dropdown", "children"),
-    Input("column1_dropdown", 'value'),
-     Input("column2_dropdown", 'value'),
-     Input("proyectos_dropdown", "value")
+    [Input("column1_dropdown", 'value'),
+    Input("column2_dropdown", 'value'),
+    Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')
      ]
 )
-def cot_graph2_callback(children, column1, column2, proyecto):
-    tmp_data = dm.data_change('cot')
-    if proyecto != 'TP':
-        tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
-    return categorical_columnbycolumn(column1, column2, tmp_data)
+def cot_bar_callback(column1, column2, inmueble, etapa, proyecto, year_values, month_values):
 
+    if inmueble == 'Casa':
+        data = dm.get_data_whithin_dates('cot', proyecto, inmueble, year_values, month_values, etapa)
+    else: 
+        data = dm.get_data_whithin_dates('cot', proyecto, inmueble, year_values, month_values)
+
+    return categorical_columnbycolumn(column1, column2, data)
+
+# Grafico de Pie
 @app.callback(
     Output("neg_graph1", "figure"),
     [
-    	Input("proyectos_dropdown", "children"),
-        Input("proyectos_dropdown", "value"),
         Input("column1_dropdown", "value"),
+        Input("inmuebles_dropdown", "value"),
+        Input("etapa_dropdown", "value"),
+        Input("proyectos_dropdown", "value"),
+        Input('datos_year_rangeslider', 'value'),
+        Input('datos_month_rangeslider', 'value')
     ],
 )
-def neg_graph1_callback(children, proyecto, col1):
-    tmp_data = dm.data_change('neg')
-    if proyecto != 'TP':
-        tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
-    return pie_chart(tmp_data, col1)
+def neg_pie_callback(vcol1, inmueble, etapa, proyecto, year_values, month_values):
+    if inmueble == 'Casa':
+        data = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values, etapa)
+    else: 
+        data = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values)
 
+
+    return pie_chart(data, vcol1)
+
+#PIE
+# Grafico doble columna
 @app.callback(
     Output('neg_graph2', 'figure'),
-    [
-	Input("proyectos_dropdown", "children"),
-    Input("column1_dropdown", 'value'),
-     Input("column2_dropdown", 'value'),
-     Input("proyectos_dropdown", "value")
+    [Input("column1_dropdown", 'value'),
+    Input("column2_dropdown", 'value'),
+    Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')
      ]
 )
-def neg_graph2_callback(children, column1, column2, proyecto):
-    tmp_data = dm.data_change('neg')
-    if proyecto != 'TP':
-        tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
-    return categorical_columnbycolumn(column1, column2, tmp_data)
+def neg_bar_callback(column1, column2, inmueble, etapa, proyecto, year_values, month_values):
+
+    if inmueble == 'Casa':
+        data = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values, etapa)
+    else: 
+        data = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values)
+
+    return categorical_columnbycolumn(column1, column2, data)
+# Grafico de Pie
+@app.callback(
+    Output("comp_graph1", "figure"),
+    [
+        Input("column1_dropdown", "value"),
+        Input("inmuebles_dropdown", "value"),
+        Input("etapa_dropdown", "value"),
+        Input("proyectos_dropdown", "value"),
+        Input('datos_year_rangeslider', 'value'),
+        Input('datos_month_rangeslider', 'value')
+    ],
+)
+def comp_pie_callback(vcol1, inmueble, etapa, proyecto, year_values, month_values):
+    if inmueble == 'Casa':
+        data = dm.get_data_whithin_dates('comp', proyecto, inmueble, year_values, month_values, etapa)
+    else: 
+        data = dm.get_data_whithin_dates('comp', proyecto, inmueble, year_values, month_values)
+
+
+    return pie_chart(data, vcol1)
+
+#PIE
+# Grafico doble columna
+@app.callback(
+    Output('comp_graph2', 'figure'),
+    [Input("column1_dropdown", 'value'),
+    Input("column2_dropdown", 'value'),
+    Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')
+     ]
+)
+def comp_bar_callback(column1, column2,  inmueble, etapa, proyecto, year_values, month_values):
+
+    if inmueble == 'Casa':
+        data = dm.get_data_whithin_dates('comp', proyecto, inmueble, year_values, month_values, etapa)
+    else: 
+        data = dm.get_data_whithin_dates('comp', proyecto, inmueble, year_values, month_values)
+
+    return categorical_columnbycolumn(column1, column2, data)
+
 
 @app.callback(
     Output("cot_neg_period", "figure"),

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import math
 import json
+import numpy as np
 
 import pandas as pd
 import flask
@@ -270,13 +271,36 @@ layout = [
                 ),
                 # Date Picker
                 html.Div([
-                    html.P("Periodo de Tiempo:"),
-                    dcc.DatePickerRange(
-                                    id='date-picker-range',
-                                    start_date=dt(1997, 5, 3),
-                                    end_date_placeholder_text='Select a date!'
+                        html.Div(
+                            [
+                                # html.P("Unidad Tiempo:"),
+                                html.Div(
+                                    dcc.RangeSlider(
+                                    id='datos_year_rangeslider',
+                                    marks={i: '{}'.format(i) for i in dm.data_years},
+                                    min=dm.date_min,
+                                    max=dm.date_max,
+                                    value=[dm.date_min, dm.date_max]
                                 )
-                    ], className='two columns'),
+                                ),                              
+                            ]
+                            ,className='row', style={'padding':'30'}),
+                        
+                    html.Div(
+                            [
+                                # html.P("Unidad Tiempo:"),
+                                html.Div(
+                                    dcc.RangeSlider(
+                                    id='datos_month_rangeslider',
+                                    marks={i: '{}'.format(j) for i, j in zip(range(1, 13), dm.months)},
+                                    min=1,
+                                    max=12,
+                                    value=[1,12]
+                                )
+                                ),                              
+                            ]
+                            ,className='row', style={'padding':'30'})
+                ],className='four columns'),
 
 
             ],
@@ -437,104 +461,61 @@ def column2_options_callback(data, value):
     [Input("data_dropdown", "value"),
     Input("inmuebles_dropdown", "value"),
     Input("etapa_dropdown", "value"),
-    Input('proyectos_dropdown', 'value')]
+    Input('proyectos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')]
 )
-def left_cases_indicator_callback(data, inmueble, etapa, proyecto):
+def left_cases_indicator_callback(data, inmueble, etapa, proyecto, year_values, month_values):
     if inmueble == 'Casa':
-        return dm.get_filas_data(data, inmueble, proyecto, etapa)
+        data = dm.get_data_whithin_dates(data, proyecto, inmueble, year_values, month_values, etapa)
     else: 
-        return dm.get_filas_data(data, inmueble, proyecto)
+        data = dm.get_data_whithin_dates(data, proyecto, inmueble, year_values, month_values)
+
+    return data.shape[0]
 
 @app.callback(
     Output("middle_cases_indicator", "children"), 
     [Input("data_dropdown", "value"),
     Input("inmuebles_dropdown", "value"),
     Input("etapa_dropdown", "value"),
-    Input('proyectos_dropdown', 'value')]
+    Input('proyectos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')]
 )
-def middle_cases_indicator_callback(data, inmueble, etapa, proyecto):
+def middle_cases_indicator_callback(data, inmueble, etapa, proyecto, year_values, month_values):
+
     if inmueble == 'Casa':
-        return dm.get_personas_total(data, inmueble, proyecto, etapa)
+        data = dm.get_data_whithin_dates(data, proyecto, inmueble, year_values, month_values, etapa)
     else: 
-        return dm.get_personas_total(data, inmueble, proyecto)
+        data = dm.get_data_whithin_dates(data, proyecto, inmueble, year_values, month_values)
+
+    return data.RUT.nunique()
 
 @app.callback(
     Output("right_cases_indicator", "children"), 
     [Input("data_dropdown", "value"),
     Input("inmuebles_dropdown", "value"),
     Input("etapa_dropdown", "value"),
-    Input('proyectos_dropdown', 'value')]
+    Input('proyectos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')]
 )
-def right_cases_indicator_callback(data, inmueble, etapa, proyecto):
-    if inmueble == 'Casa':
-        return dm.get_personas_cot_mean(data, inmueble, proyecto, etapa)
-    else: 
-        return dm.get_personas_cot_mean(data, inmueble, proyecto)
-
-@app.callback(
-    Output("first_cases_indicator", "children"), 
-    [Input("data_dropdown", "value"),
-    Input("inmuebles_dropdown", "value"),
-    Input("etapa_dropdown", "value"),
-    Input('proyectos_dropdown', 'value')]
-)
-def first_indicator_callback(data, inmueble, etapa, proyecto):
-    if data != 'neg':
-        return []
+def right_cases_indicator_callback(data, inmueble, etapa, proyecto, year_values, month_values):
 
     if inmueble == 'Casa':
-        return dm.get_reservas(data, inmueble,  proyecto, etapa)
+        data = dm.get_data_whithin_dates(data, proyecto, inmueble, year_values, month_values, etapa)
     else: 
-        return dm.get_reservas(data, inmueble,  proyecto)
+        data = dm.get_data_whithin_dates(data, proyecto, inmueble, year_values, month_values)
 
-@app.callback(
-    Output("second_cases_indicator", "children"), 
-    [Input("data_dropdown", "value"),
-    Input("inmuebles_dropdown", "value"),
-    Input("etapa_dropdown", "value"),
-    Input('proyectos_dropdown', 'value')]
-)
-def second_indicator_callback(data, inmueble, etapa, proyecto):
-    if data != 'neg':
-        return []
 
-    if inmueble == 'Casa':
-        return dm.get_promesas(data, inmueble,  proyecto, etapa)
-    else: 
-        return dm.get_promesas(data, inmueble,  proyecto)
-
-@app.callback(
-    Output("third_cases_indicator", "children"), 
-    [Input("data_dropdown", "value"),
-    Input("inmuebles_dropdown", "value"),
-    Input("etapa_dropdown", "value"),
-    Input('proyectos_dropdown', 'value')]
-)
-def third_indicator_callback(data, inmueble, etapa, proyecto):
-    if data != 'neg':
-        return []
-
-    if inmueble == 'Casa':
-        return dm.get_escrituras(data, inmueble,  proyecto, etapa)
-    else: 
-        return dm.get_escrituras(data, inmueble,  proyecto)
-
-@app.callback(
-    Output("fourth_cases_indicator", "children"), 
-    [Input("data_dropdown", "value"),
-    Input("inmuebles_dropdown", "value"),
-    Input("etapa_dropdown", "value"),
-    Input('proyectos_dropdown', 'value')]
-)
-def fourth_indicator_callback(data, inmueble, etapa, proyecto):
-    if data != 'neg':
-        return []
-
-    if inmueble == 'Casa':
-        return dm.get_entregas(data, inmueble,  proyecto, etapa)
-    else: 
-        return dm.get_entregas(data, inmueble,  proyecto)
-
+    num_cot = []
+    for group, frame in data.groupby('RUT'):
+        num_cot.append(frame.shape[0])
+    
+    try:
+        return millify(np.mean(num_cot))
+    except ValueError:
+        return 'Error'
 
 ##GRAFICOS
 #############################################################################
@@ -546,47 +527,56 @@ def fourth_indicator_callback(data, inmueble, etapa, proyecto):
         Input("data_dropdown", "value"),
         Input("inmuebles_dropdown", "value"),
         Input("etapa_dropdown", "value"),
-        Input('proyectos_dropdown', 'value')
-    ],
-)
-def pie_chart_callback(vcol1, data, inmueble, etapa, proyecto):
-    if inmueble == 'Casa':
-        tmp_data = dm.get_data(data, inmueble, proyecto, etapa)
-    else: 
-        tmp_data = dm.get_data(data, inmueble, proyecto)
-
-    return pie_chart(tmp_data, vcol1)
-
-# Grafico de barras en el tiempo
-@app.callback(
-    Output("cases_by_period", "figure"),
-    [
         Input("proyectos_dropdown", "value"),
-        Input("period_dropdown", "value"),
-        Input('data_dropdown', 'value'),
+        Input('datos_year_rangeslider', 'value'),
+        Input('datos_month_rangeslider', 'value')
     ],
 )
-def data_period_callback(proyecto, periodo, data):
-    tmp_data = dm.data_change(data)
-    if proyecto != 'TP':
-        tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
-    return bar_period_chart(periodo, tmp_data)
+def pie_chart_callback(vcol1, data, inmueble, etapa, proyecto, year_values, month_values):
+    if inmueble == 'Casa':
+        data = dm.get_data_whithin_dates(data, proyecto, inmueble, year_values, month_values, etapa)
+    else: 
+        data = dm.get_data_whithin_dates(data, proyecto, inmueble, year_values, month_values)
+
+
+    return pie_chart(data, vcol1)
 
 # Grafico doble columna
 @app.callback(
     Output('cases_reasons', 'figure'),
     [Input("column1_dropdown", 'value'),
-     Input("column2_dropdown", 'value'),
-     Input("data_dropdown", "value"),
-        Input("inmuebles_dropdown", "value"),
-        Input("etapa_dropdown", "value"),
-        Input('proyectos_dropdown', 'value')
+    Input("column2_dropdown", 'value'),
+    Input("data_dropdown", "value"),
+    Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')
      ]
 )
-def columns_two_callback(column1, column2, data, inmueble, etapa, proyecto):
+def columns_two_callback(column1, column2, data, inmueble, etapa, proyecto, year_values, month_values):
+
     if inmueble == 'Casa':
-        tmp_data = dm.get_data(data, inmueble, proyecto, etapa)
+        data = dm.get_data_whithin_dates(data, proyecto, inmueble, year_values, month_values, etapa)
     else: 
-        tmp_data = dm.get_data(data, inmueble, proyecto)
-    
-    return categorical_columnbycolumn(column1, column2, tmp_data)
+        data = dm.get_data_whithin_dates(data, proyecto, inmueble, year_values, month_values)
+
+    return categorical_columnbycolumn(column1, column2, data)
+
+# Grafico de barras en el tiempo
+@app.callback(
+    Output("cases_by_period", "figure"),
+    [
+    Input("proyectos_dropdown", "value"),
+    Input("period_dropdown", "value"),
+    Input('data_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')
+    ],
+)
+def data_period_callback(proyecto, periodo, data, year_values, month_values):
+    tmp_data = dm.data_change(data)
+    if proyecto != 'TP':
+        tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
+    return bar_period_chart(periodo, tmp_data)
+

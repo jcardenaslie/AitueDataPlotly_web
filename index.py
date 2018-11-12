@@ -6,7 +6,7 @@ import pandas as pd
 
 from app import app
 
-from apps import data, versus, gain, ventas
+from apps import data, versus, ventas, productos
 
 
 app.layout = html.Div(children=[
@@ -29,11 +29,12 @@ app.layout = html.Div(children=[
                 style={"height":"20","verticalAlign":"middle"},
                 children=[
                     dcc.Tab(label="Ventas", value="ventas_tab"),
+                    dcc.Tab(label="Productos", value="prod_tab"),
                     dcc.Tab(id="data_tab", label="Datos", value="data_tab"),
                     dcc.Tab(label="Cotización vs Negocios", value="versus_tab"),
-                    # dcc.Tab(label="Listas", value="lista_tab"),
+                    
                 ],
-                value="ventas_tab",
+                value="prod_tab",
             )
 
             ],className="row tabs_div"
@@ -67,7 +68,9 @@ def render_content(tab):
     elif tab == "ventas_tab":
         return ventas.layout
         pass
-
+    elif tab == "prod_tab":
+        return productos.layout
+        pass
     else:
         pass
         # return opportunities.layout
