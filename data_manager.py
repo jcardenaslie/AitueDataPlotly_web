@@ -1,3 +1,5 @@
+import timeit
+start_dm = timeit.default_timer()
 import pandas as pd
 import numpy as np
 import app as app
@@ -7,6 +9,18 @@ import copy
 
 months = ['Ene', 'Feb', 'Mar', 'Abr',
 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dec']
+
+first_time_calc = {'cot':True, 'neg': True, 'comp':True}
+
+#cambia el set de datos
+def data_change(data):
+    if data == 'cot':
+        df = cot_all[:]
+    elif data=='neg':
+        df = neg_all[:]
+    elif data == 'comp':
+        df = neg_all[(neg_all['Estado'] == 'Escriturado') | (neg_all['Estado'] == 'Entregado')]
+    return df
 
 def get_data(data, inmueble=None, proyecto=None, etapa=None):
     data = data_change(data)
@@ -21,16 +35,6 @@ def get_data(data, inmueble=None, proyecto=None, etapa=None):
         data = data[data.Etapa == etapa]
 
     return data
-
-#cambia el set de datos
-def data_change(data):
-    if data == 'cot':
-        df = cot_all
-    elif data=='neg':
-        df = neg_all
-    elif data == 'comp':
-        df = neg_all[(neg_all['Estado'] == 'Escriturado') | (neg_all['Estado'] == 'Entregado')]
-    return df
 
 # Trae los proyectos que vende el inmbueble
 def get_proyectos_in_inmueble(data, inmueble):
@@ -142,39 +146,60 @@ def get_productos(proyecto, etapa):
 
 def get_prod_mas_cotizado_persona(data,  proyecto, etapa=None, ascending=False, q=1) :
     
-    prod_sdv = get_productos(proyecto, etapa)
-    
-    if data == 'cot':
-        data_tmp = cot_prod_info
-    elif data == 'neg':
-        data_tmp = neg_prod_info
-    elif data == 'comp':
-        data_tmp = comp_prod_info
-    
+    data_tmp = cot_productos[data]
+
     if proyecto != 'TP' and proyecto != None:
         data_tmp = data_tmp[(data_tmp.Proyecto == proyecto) ]
     if etapa != 'TE' and etapa != None:
-            data_tmp = data_tmp[(data_tmp.Etapa == etapa)]
+        data_tmp = data_tmp[(data_tmp.Etapa == etapa)]
 
     if ascending == True:
         data_tmp = data_tmp.sort_values(by='Nro Personas', ascending=True)
     return data_tmp.head(q)
 
-def calc_nro_cotizaciones(data):
-    prod_sdv = productos
-    cot_sdv = get_data(data)
+# def get_prod_mas_cotizado_persona(data,  proyecto, etapa=None, ascending=False, q=1) :
+    
+#     prod_sdv = get_productos(proyecto, etapa)
+    
+#     start_data = timeit.default_timer()
+#     global cot_prod_info, first_time_calc
+#     if first_time_calc[data] == True:
+#         # prod_info = calc_nro_cotizaciones(data)
+#         first_time_calc[data] = False
+#     stop_data = timeit.default_timer()
+#     print('END DATA CALC','Time: ', stop_data - start_data)
+    
+    
+#     data_tmp = prod_info
+    
+    
+#     if proyecto != 'TP' and proyecto != None:
+#         data_tmp = data_tmp[(data_tmp.Proyecto == proyecto) ]
+#     if etapa != 'TE' and etapa != None:
+#         data_tmp = data_tmp[(data_tmp.Etapa == etapa)]
 
+#     if ascending == True:
+#         data_tmp = data_tmp.sort_values(by='Nro Personas', ascending=True)
+#     return data_tmp.head(q)
+
+def calc_nro_cotizaciones(data):
+    
+    
+    cot_sdv = get_data(data)
+    prod_sdv = productos[productos.Proyecto.isin(cot_sdv.Proyecto.unique())]
+    #############################################################################
+    # start = timeit.default_timer()
     cot_prod = dict() # productos cotizados por etapa
     cot_prod['ID Cot'] = list()
     cot_prod['Producto'] = list()
     cot_prod['RUT'] = list()
     cot_prod['Fecha Cot'] = list()
-    cot_prod['Etapa'] = list()
-    cot_prod['Proyecto'] = list()
-    drop = ['Nombre', 'SobrePrecio', 'Producto', 
-                'Precio Lista', 'Precio Venta', 'Precio Esperado',
-                'Baños', 'Dormitorios', 'Cod Proyecto', 'Cod Etapa']
 
+    # drop = ['Nombre', 'SobrePrecio',
+    #             'Precio Lista', 'Precio Venta', 'Precio Esperado',
+    #             'Baños', 'Dormitorios', 'Cod Proyecto', 'Cod Etapa']   
+    # prod_sdv.drop(drop, axis=1, inplace=True)
+    
     results = []
     for proyecto in cot_sdv.Proyecto.unique():
         cot_proy = cot_sdv[cot_sdv.Proyecto == proyecto]
@@ -183,22 +208,18 @@ def calc_nro_cotizaciones(data):
             prod_etapa = prod_proy[prod_proy.Etapa == etapa]
             cot_etapa = cot_proy[cot_proy.Etapa == etapa]
             for index, row in cot_etapa.iterrows():
-                prod = row['Productos']
+                prod = row['Productos'] #Cotizaciones
                 if isinstance(prod, int):
                     cot_prod['Producto'].append(prod)
                     cot_prod['RUT'].append(row['RUT'])
                     cot_prod['ID Cot'].append(row['ID'])
                     cot_prod['Fecha Cot'].append(row['Fecha Cotizacion'])
-                    cot_prod['Etapa'].append(row['Etapa'])
-                    cot_prod['Proyecto'].append(row['Proyecto'])
                 elif isinstance(prod, str):
                     for p in prod.split(','):
                         cot_prod['Producto'].append(p)
                         cot_prod['RUT'].append(row['RUT'])
                         cot_prod['ID Cot'].append(row['ID'])
                         cot_prod['Fecha Cot'].append(row['Fecha Cotizacion'])
-                        cot_prod['Etapa'].append(row['Etapa'])
-                        cot_prod['Proyecto'].append(row['Proyecto'])
                 elif isinstance(prod, float):
                     prod = str(prod)
                     for p in prod.split('.'):
@@ -206,71 +227,94 @@ def calc_nro_cotizaciones(data):
                         cot_prod['RUT'].append(row['RUT'])
                         cot_prod['ID Cot'].append(row['ID'])
                         cot_prod['Fecha Cot'].append(row['Fecha Cotizacion'])
-                        cot_prod['Etapa'].append(row['Etapa'])
-                        cot_prod['Proyecto'].append(row['Proyecto'])
+            tmp = pd.DataFrame(cot_prod)        
+            tmp.Producto = tmp.Producto.astype('str')
+            prod_etapa['Numero Unidad'] = prod_etapa['Numero Unidad'].astype('str')
             
-
-            tmp = pd.DataFrame(cot_prod)
-            tmp.drop(['Etapa', 'Proyecto'], axis=1, inplace=True)
             cot_prod_merge = tmp.merge(prod_etapa, left_on='Producto', right_on='Numero Unidad',how='left')
-            cotizacion_producto = cot_prod_merge.drop(drop, axis=1)
-            results.append(cotizacion_producto)
-
+            results.append(cot_prod_merge)
+    
+    # stop = timeit.default_timer()
+    # print('END COT SINGLE','Time: ', stop - start)
+    #############################################################################
+    # start = timeit.default_timer()
     if len(results) > 1:
         cot_prod_info = pd.concat(results)
     else:
         cot_prod_info = results[0]
+
+    # print(cot_prod_info.shape)
 
     cot_prod_info['count'] = 1
     # prod_nro_cot = dict()
     prod_nro_cot_persona = dict()
 
     # Numero de cotizaciones por persona por producto
-    for group, frame in cot_prod_info.groupby(['Proyecto','Etapa','Numero Unidad' ]):
+    
+    for group, frame in cot_prod_info.groupby(['Proyecto','Etapa','Producto' ]):
         prod_nro_cot_persona[group] = frame['RUT'].nunique()
+    # stop = timeit.default_timer()
+    # print('END CALC PERSONAS','Time: ', stop - start)
 
-
+    #############################################################################
     prod_sdv_cp = copy.deepcopy(prod_sdv)
     prod_sdv_cp['Nro Personas'] = 0
 
     prod_sdv_cp.set_index(['Proyecto','Etapa','Numero Unidad' ], inplace=True)
+
     
+    # start = timeit.default_timer()
     for index, prod in prod_sdv_cp.iterrows():
         if index in prod_nro_cot_persona.keys():
             prod_sdv_cp.at[index, 'Nro Personas'] =  prod_nro_cot_persona[index]
+    # stop = timeit.default_timer()
+    # print('END COTPROD MIX','Time: ', stop - start)
+    #############################################################################
+    # print(prod_sdv_cp.shape)
     
     prod_sdv_cp=prod_sdv_cp.reset_index().sort_values(by='Nro Personas', ascending=False)
-    
+    # stop = timeit.default_timer()
+    # print('END PROD SORT','Time: ', stop - start)
     return prod_sdv_cp
 
 ##########################################################################################################################
-# cot_all = pd.read_excel('Data/cotizaciones_all.xlsx')
-# cot_all = pd.read_csv('Data\\cotizaciones_all_new.csv', index_col=[0])
-# # neg_all = pd.read_excel('Data\\negocios_all.xlsx')
-# neg_all = pd.read_csv('Data\\negocios_all_new.csv', index_col=[0])
-
-# cot_all = pd.read_excel('Data/cotizaciones_all.xlsx')
+start_data = timeit.default_timer()
 cot_all = pd.read_csv('Data/cotizaciones_all_new.csv', index_col=[0])
-# neg_all = pd.read_excel('Data\\negocios_all.xlsx')
 neg_all = pd.read_csv('Data/negocios_all_new.csv', index_col=[0])
 
 productos = pd.read_csv('Data/productos.csv', index_col=[0], encoding = "ISO-8859-1")
+drop = ['SobrePrecio','Precio Lista', 'Precio Venta', 'Precio Esperado', 'Baños', 'Dormitorios', 'Cod Proyecto', 'Cod Etapa']
+productos.drop(drop, axis=1, inplace = True)
+# cot_productos_comp = pd.read_excel('Data/cot_productos_comp.xlsx')
+# cot_productos_cot = pd.read_excel('Data/cot_productos_cot.xlsx')
+# cot_productos_neg = pd.read_excel('Data/cot_productos_neg.xlsx')
+
+# cot_productos = {'cot':cot_productos_cot, 'neg': cot_productos_neg, 'comp':cot_productos_comp}
+stop_data = timeit.default_timer()
+print('END DATA LOAD','Time: ', stop_data - start_data)
+##########################################################################################################################
 
 
-
-
+start_prod = timeit.default_timer()
 cot_prod_info = calc_nro_cotizaciones('cot')
 neg_prod_info = calc_nro_cotizaciones('neg')
 comp_prod_info = calc_nro_cotizaciones('comp')
+cot_productos = {'cot':cot_prod_info, 'neg': neg_prod_info, 'comp':comp_prod_info}
 
+stop_prod = timeit.default_timer()
+print('END DATA PROD INFO','Time: ', stop_prod - start_prod)
+##########################################################################################################################
 
 # Cuando se trabaja con csv
 cot_all['Fecha Cotizacion'] =  pd.to_datetime(cot_all['Fecha Cotizacion'])
 neg_all['Fecha Cotizacion'] =  pd.to_datetime(neg_all['Fecha Cotizacion'])
 
+
+
+################################################################################################
+start_toolbar = timeit.default_timer()
+
 df = cot_all
-
-
 date_min = cot_all['Fecha Cotizacion'].min().year
 date_max =cot_all['Fecha Cotizacion'].max().year
 
@@ -289,4 +333,9 @@ proyects_options.append({'label':'Todos los Proyectos', 'value': 'TP'})
 categorical_columns = get_categorical_columns(df)
 cat_options = [{'label': col, 'value': col} for col in categorical_columns]
 
+stop_toolbar = timeit.default_timer()
+print('END TOOLBAR','Time: ', stop_toolbar - start_toolbar)
+######################################################################################################
 
+stop_dm = timeit.default_timer()
+print('END DATA MANAGER','Time: ', stop_dm - start_dm)

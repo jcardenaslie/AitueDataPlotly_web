@@ -34,7 +34,7 @@ app.layout = html.Div(children=[
                     dcc.Tab(label="Cotización vs Negocios", value="versus_tab"),
                     
                 ],
-                value="prod_tab",
+                value="ventas_tab",
             )
 
             ],className="row tabs_div"

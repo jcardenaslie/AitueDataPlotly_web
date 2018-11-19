@@ -513,7 +513,7 @@ def prod_mas_compra(inmueble, etapa, proyecto, year_values, month_values):
 	
 	return top.Programa
 
-#############################################################################################
+############################################################################################
 @app.callback(
 	Output("prod_menos_cotizado", 'children'),
 	[Input("inmuebles_dropdown", "value"),
@@ -568,7 +568,7 @@ def prod_menos_compra(inmueble, etapa, proyecto, year_values, month_values):
 	
 	return top.Programa
 
-#############################################################################################
+############################################################################################
 
 @app.callback(
 	Output("top_prod_cotizados", 'children'),
@@ -627,7 +627,7 @@ def top_prod_negociados(inmueble, etapa, proyecto, year_values, month_values):
 	table = df_to_table(top[columns])
 	return table
 
-#############################################################################################
+############################################################################################
 
 @app.callback(
 	Output("menor_prod_cotizados", 'children'),
