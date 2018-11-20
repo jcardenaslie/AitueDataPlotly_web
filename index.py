@@ -12,7 +12,6 @@ from apps import data, versus, ventas, productos
 app.layout = html.Div(children=[
         # header
         html.Div([
-
             html.Span("AITUE DASH", className='app-title'),
             
             html.Div(

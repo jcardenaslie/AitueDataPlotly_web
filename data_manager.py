@@ -122,13 +122,14 @@ def get_entregas(data, inmueble,  proyecto, etapa=None):
     data = data[data['Estado'] == 'Entregado']
     return data.shape[0]
 
-def get_data_whithin_dates(data, proyecto,inmueble, year_values, month_values, etapa=None,):
+def get_data_whithin_dates(data, proyecto, inmueble, year_values, month_values, etapa=None):
     fecha_ini = "" + str(year_values[0]) + "-" + str(month_values[0]) + "-1"
     fecha_fin = "" + str(year_values[1]) + "-" + str(month_values[1]) + "-31"
 
     date_check = pd.to_datetime(fecha_fin)
 
-    fechas = copy.deepcopy(get_data(data, inmueble=inmueble,proyecto=proyecto, etapa=etapa))
+    data = get_data(data, inmueble=inmueble, proyecto=proyecto, etapa=etapa)
+    fechas = copy.deepcopy(data)
     fechas = fechas.sort_values(by='Fecha Cotizacion')  
     fechas.set_index(pd.to_datetime(fechas['Fecha Cotizacion']), inplace=True)
     fechas = fechas.loc[fecha_ini : fecha_fin]
@@ -182,13 +183,17 @@ def get_prod_mas_cotizado_persona(data,  proyecto, etapa=None, ascending=False, 
 #         data_tmp = data_tmp.sort_values(by='Nro Personas', ascending=True)
 #     return data_tmp.head(q)
 
-def calc_nro_cotizaciones(data):
+def calc_nro_cotizaciones(data, inmueble=None, proyecto=None, year_values=None, month_values=None, etapa=None):
+    start = timeit.default_timer()
+    if inmueble == None : inmueble = 'TI'
+    if proyecto == None : proyecto = 'TP'
+    if year_values == None : year_values = ['1990', '2050']
+    if month_values == None : month_values = ['1', '12']
+
+    cot_sdv = get_data_whithin_dates(data, proyecto, inmueble, year_values, month_values, etapa=etapa)
     
-    
-    cot_sdv = get_data(data)
     prod_sdv = productos[productos.Proyecto.isin(cot_sdv.Proyecto.unique())]
     #############################################################################
-    # start = timeit.default_timer()
     cot_prod = dict() # productos cotizados por etapa
     cot_prod['ID Cot'] = list()
     cot_prod['Producto'] = list()
@@ -234,10 +239,7 @@ def calc_nro_cotizaciones(data):
             cot_prod_merge = tmp.merge(prod_etapa, left_on='Producto', right_on='Numero Unidad',how='left')
             results.append(cot_prod_merge)
     
-    # stop = timeit.default_timer()
-    # print('END COT SINGLE','Time: ', stop - start)
     #############################################################################
-    # start = timeit.default_timer()
     if len(results) > 1:
         cot_prod_info = pd.concat(results)
     else:
@@ -253,8 +255,6 @@ def calc_nro_cotizaciones(data):
     
     for group, frame in cot_prod_info.groupby(['Proyecto','Etapa','Producto' ]):
         prod_nro_cot_persona[group] = frame['RUT'].nunique()
-    # stop = timeit.default_timer()
-    # print('END CALC PERSONAS','Time: ', stop - start)
 
     #############################################################################
     prod_sdv_cp = copy.deepcopy(prod_sdv)
@@ -263,18 +263,16 @@ def calc_nro_cotizaciones(data):
     prod_sdv_cp.set_index(['Proyecto','Etapa','Numero Unidad' ], inplace=True)
 
     
-    # start = timeit.default_timer()
     for index, prod in prod_sdv_cp.iterrows():
         if index in prod_nro_cot_persona.keys():
             prod_sdv_cp.at[index, 'Nro Personas'] =  prod_nro_cot_persona[index]
-    # stop = timeit.default_timer()
-    # print('END COTPROD MIX','Time: ', stop - start)
     #############################################################################
     # print(prod_sdv_cp.shape)
     
     prod_sdv_cp=prod_sdv_cp.reset_index().sort_values(by='Nro Personas', ascending=False)
-    # stop = timeit.default_timer()
-    # print('END PROD SORT','Time: ', stop - start)
+    stop = timeit.default_timer()
+    print('END PROD CALCULATION','Time: ', stop - start)
+
     return prod_sdv_cp
 
 ##########################################################################################################################
@@ -296,10 +294,10 @@ print('END DATA LOAD','Time: ', stop_data - start_data)
 
 
 start_prod = timeit.default_timer()
-cot_prod_info = calc_nro_cotizaciones('cot')
-neg_prod_info = calc_nro_cotizaciones('neg')
-comp_prod_info = calc_nro_cotizaciones('comp')
-cot_productos = {'cot':cot_prod_info, 'neg': neg_prod_info, 'comp':comp_prod_info}
+# cot_prod_info = calc_nro_cotizaciones('cot')
+# neg_prod_info = calc_nro_cotizaciones('neg')
+# comp_prod_info = calc_nro_cotizaciones('comp')
+# cot_productos = {'cot':cot_prod_info, 'neg': neg_prod_info, 'comp':comp_prod_info}
 
 stop_prod = timeit.default_timer()
 print('END DATA PROD INFO','Time: ', stop_prod - start_prod)

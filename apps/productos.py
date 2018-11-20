@@ -12,6 +12,7 @@ from plotly import graph_objs as go
 from app import app, indicator, millify, df_to_table
 import data_manager as dm
 from datetime import datetime as dt
+import timeit
 
 def bar_stacked_graph(proyecto):
     
@@ -240,7 +241,7 @@ layout = [
             className="row",
     ),
 
-        # tables row div
+    # tables row div
     html.Div(
         [
             html.Div(
@@ -428,12 +429,64 @@ layout = [
         className="row",
         style={"marginTop": "5px", "max height": "200px"},
     ),
-
-    
+    html.Div(id="cot_prod_info", style={"display": "none"},),
+    html.Div(id="neg_prod_info", style={"display": "none"},),
+    html.Div(id="comp_prod_info", style={"display": "none"},),
 ]
 
+@app.callback(
+    Output('cot_prod_info', 'children'),
+    [Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')]
+)
+def calculate_productos_cot(inmueble, etapa, proyecto, year_values, month_values):
+    if inmueble == 'Casa':
+        df = dm.calc_nro_cotizaciones('cot', inmueble, proyecto, year_values, month_values, etapa=etapa)
+    else:
+        df = dm.calc_nro_cotizaciones('cot', inmueble, proyecto, year_values, month_values)
+    # print(df.head())
+    return df.to_json(date_format='iso', orient='split')
 
+@app.callback(
+    Output('neg_prod_info', 'children'),
+    [Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')]
+)
+def calculate_productos_neg(inmueble, etapa, proyecto, year_values, month_values):
+    start = timeit.default_timer()
+    
+    if inmueble == 'Casa':
+        df = dm.calc_nro_cotizaciones('neg', inmueble, proyecto, year_values, month_values, etapa=etapa)
+    else:
+        df = dm.calc_nro_cotizaciones('neg', inmueble, proyecto, year_values, month_values)
+    stop = timeit.default_timer()
+    print('END PROD CALCULATION','Time: ', stop - start)
+    # print(df.head())
+    return df.to_json(date_format='iso', orient='split')
 
+@app.callback(
+    Output('comp_prod_info', 'children'),
+    [Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')]
+)
+def calculate_productos_comp(inmueble, etapa, proyecto, year_values, month_values):
+    if inmueble == 'Casa':
+        df = dm.calc_nro_cotizaciones('comp', inmueble, proyecto, year_values, month_values, etapa=etapa)
+    else:
+        df = dm.calc_nro_cotizaciones('comp', inmueble, proyecto, year_values, month_values)
+    # print(df.head())
+    return df.to_json(date_format='iso', orient='split')
+
+##############################################################################################################
 @app.callback(
 	Output("prueba", 'children'),
 	[
@@ -458,230 +511,124 @@ def etapa_bar_stacked_callback(proyecto,):
     else:
         return []
     # return bar_stacked_graph(proyecto)
+
 #############################################################################################
 @app.callback(
 	Output("prod_mas_cotizado", 'children'),
-	[Input("inmuebles_dropdown", "value"),
-	Input("etapa_dropdown", "value"),
-	Input('proyectos_dropdown', 'value'),
-	Input('datos_year_rangeslider', 'value'),
-	Input('datos_month_rangeslider', 'value')
-	]
+	[Input('cot_prod_info', 'children')]
 )
 
-def prod_mas_cotizado(inmueble, etapa, proyecto, year_values, month_values):
-	if inmueble == 'Casa':
-			top = dm.get_prod_mas_cotizado_persona('cot', proyecto, etapa)
-	else:
-			top = dm.get_prod_mas_cotizado_persona('cot', proyecto)
-	
-	return top.Programa
+def prod_mas_cotizado(jsondf):
+    df = pd.read_json(jsondf, orient='split')
+    return df.Programa.head(1)
 
 @app.callback(
-	Output("prod_mas_negocio", 'children'),
-	[Input("inmuebles_dropdown", "value"),
-	Input("etapa_dropdown", "value"),
-	Input('proyectos_dropdown', 'value'),
-	Input('datos_year_rangeslider', 'value'),
-	Input('datos_month_rangeslider', 'value')
-	]
+    Output("prod_mas_negocio", 'children'),
+    [Input('neg_prod_info', 'children')]
 )
 
-def prod_mas_negocio(inmueble, etapa, proyecto, year_values, month_values):
-	if inmueble == 'Casa':
-			top = dm.get_prod_mas_cotizado_persona('neg', proyecto, etapa)
-	else:
-			top = dm.get_prod_mas_cotizado_persona('neg', proyecto)
-	
-	return top.Programa
+def prod_mas_negociado(jsondf):
+    df = pd.read_json(jsondf, orient='split')
+    return df.Programa.head(1)
 
 @app.callback(
-	Output("prod_mas_vendido", 'children'),
-	[Input("inmuebles_dropdown", "value"),
-	Input("etapa_dropdown", "value"),
-	Input('proyectos_dropdown', 'value'),
-	Input('datos_year_rangeslider', 'value'),
-	Input('datos_month_rangeslider', 'value')
-	]
+    Output("prod_mas_vendido", 'children'),
+    [Input('comp_prod_info', 'children')]
 )
 
-def prod_mas_compra(inmueble, etapa, proyecto, year_values, month_values):
-	if inmueble == 'Casa':
-			top = dm.get_prod_mas_cotizado_persona('comp', proyecto, etapa)
-	else:
-			top = dm.get_prod_mas_cotizado_persona('comp', proyecto)
-	
-	return top.Programa
+def prod_mas_vendido(jsondf):
+    df = pd.read_json(jsondf, orient='split')
+    return df.Programa.head(1)
 
-############################################################################################
+# ############################################################################################
 @app.callback(
-	Output("prod_menos_cotizado", 'children'),
-	[Input("inmuebles_dropdown", "value"),
-	Input("etapa_dropdown", "value"),
-	Input('proyectos_dropdown', 'value'),
-	Input('datos_year_rangeslider', 'value'),
-	Input('datos_month_rangeslider', 'value')
-	]
+    Output("top_prod_cotizados", 'children'),
+    [Input('cot_prod_info', 'children')]
 )
 
-def prod_menos_cotizado(inmueble, etapa, proyecto, year_values, month_values):
-	if inmueble == 'Casa':
-			top = dm.get_prod_mas_cotizado_persona('cot', proyecto, etapa, ascending=True)
-	else:
-			top = dm.get_prod_mas_cotizado_persona('cot', proyecto, ascending=True)
-	
-	return top.Programa
+def prod_mas_cotizado(jsondf):
+    df = pd.read_json(jsondf, orient='split')
+    columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
+    return df_to_table(df[columns].head())
 
 @app.callback(
-	Output("prod_menos_negocio", 'children'),
-	[Input("inmuebles_dropdown", "value"),
-	Input("etapa_dropdown", "value"),
-	Input('proyectos_dropdown', 'value'),
-	Input('datos_year_rangeslider', 'value'),
-	Input('datos_month_rangeslider', 'value')
-	]
+    Output("top_prod_negociados", 'children'),
+    [Input('neg_prod_info', 'children')]
 )
 
-def prod_menos_negocio(inmueble, etapa, proyecto, year_values, month_values):
-	if inmueble == 'Casa':
-			top = dm.get_prod_mas_cotizado_persona('neg', proyecto, etapa, ascending=True)
-	else:
-			top = dm.get_prod_mas_cotizado_persona('neg', proyecto, ascending=True)
-	
-	return top.Programa
+def prod_mas_negociado(jsondf):
+    df = pd.read_json(jsondf, orient='split')
+    columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
+    return df_to_table(df[columns].head())
 
 @app.callback(
-	Output("prod_menos_vendido", 'children'),
-	[Input("inmuebles_dropdown", "value"),
-	Input("etapa_dropdown", "value"),
-	Input('proyectos_dropdown', 'value'),
-	Input('datos_year_rangeslider', 'value'),
-	Input('datos_month_rangeslider', 'value')
-	]
+    Output("top_prod_vendidos", 'children'),
+    [Input('comp_prod_info', 'children')]
 )
 
-def prod_menos_compra(inmueble, etapa, proyecto, year_values, month_values):
-	if inmueble == 'Casa':
-			top = dm.get_prod_mas_cotizado_persona('comp', proyecto, etapa, ascending=True)
-	else:
-			top = dm.get_prod_mas_cotizado_persona('comp', proyecto, ascending=True)
-	
-	return top.Programa
+def prod_mas_vendido(jsondf):
+    df = pd.read_json(jsondf, orient='split')
+    columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
+    return df_to_table(df[columns].head())
 
-############################################################################################
+#############################################################################################
+@app.callback(
+    Output("prod_menos_cotizado", 'children'),
+    [Input('cot_prod_info', 'children')]
+)
+
+def prod_menos_cotizado(jsondf):
+    df = pd.read_json(jsondf, orient='split')
+    return df.Programa.head(1)
 
 @app.callback(
-	Output("top_prod_cotizados", 'children'),
-	[Input("inmuebles_dropdown", "value"),
-	Input("etapa_dropdown", "value"),
-	Input('proyectos_dropdown', 'value'),
-	Input('datos_year_rangeslider', 'value'),
-	Input('datos_month_rangeslider', 'value')
-	]
+    Output("prod_menos_negocio", 'children'),
+    [Input('neg_prod_info', 'children')]
 )
-def top_prod_cotizados(inmueble, etapa, proyecto, year_values, month_values):
-	if inmueble == 'Casa':
-			top = dm.get_prod_mas_cotizado_persona('cot', proyecto, etapa, q=5)
-	else:
-			top = dm.get_prod_mas_cotizado_persona('cot', proyecto, q=5)
-	
-	columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
-	table = df_to_table(top[columns])
-	return table
+
+def prod_menos_negociado(jsondf):
+    df = pd.read_json(jsondf, orient='split')
+    return df.Programa.head(1)
 
 @app.callback(
-	Output("top_prod_negociados", 'children'),
-	[Input("inmuebles_dropdown", "value"),
-	Input("etapa_dropdown", "value"),
-	Input('proyectos_dropdown', 'value'),
-	Input('datos_year_rangeslider', 'value'),
-	Input('datos_month_rangeslider', 'value')
-	]
+    Output("prod_menos_vendido", 'children'),
+    [Input('comp_prod_info', 'children')]
 )
-def top_prod_negociados(inmueble, etapa, proyecto, year_values, month_values):
-	if inmueble == 'Casa':
-			top = dm.get_prod_mas_cotizado_persona('neg', proyecto, etapa, q=5)
-	else:
-			top = dm.get_prod_mas_cotizado_persona('neg', proyecto, q=5)
-	
-	columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
-	table = df_to_table(top[columns])
-	return table
+
+def prod_menos_vendido(jsondf):
+    df = pd.read_json(jsondf, orient='split')
+    return df.Programa.head(1)
+
+# ############################################################################################
+@app.callback(
+    Output("menor_prod_cotizados", 'children'),
+    [Input('cot_prod_info', 'children')]
+)
+
+def prod_menor_cotizado(jsondf):
+    df = pd.read_json(jsondf, orient='split')
+    df = df.sort_values(by='Nro Personas', ascending=True)
+    columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
+    return df_to_table(df[columns].head())
 
 @app.callback(
-	Output("top_prod_vendidos", 'children'),
-	[Input("inmuebles_dropdown", "value"),
-	Input("etapa_dropdown", "value"),
-	Input('proyectos_dropdown', 'value'),
-	Input('datos_year_rangeslider', 'value'),
-	Input('datos_month_rangeslider', 'value')
-	]
+    Output("menor_prod_negociados", 'children'),
+    [Input('neg_prod_info', 'children')]
 )
-def top_prod_negociados(inmueble, etapa, proyecto, year_values, month_values):
-	if inmueble == 'Casa':
-			top = dm.get_prod_mas_cotizado_persona('comp', proyecto, etapa, q=5)
-	else:
-			top = dm.get_prod_mas_cotizado_persona('comp', proyecto, q=5)
-	
-	columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
-	table = df_to_table(top[columns])
-	return table
 
-############################################################################################
+def prod_menor_negociado(jsondf):
+    df = pd.read_json(jsondf, orient='split')
+    df = df.sort_values(by='Nro Personas', ascending=True)
+    columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
+    return df_to_table(df[columns].head())
 
 @app.callback(
-	Output("menor_prod_cotizados", 'children'),
-	[Input("inmuebles_dropdown", "value"),
-	Input("etapa_dropdown", "value"),
-	Input('proyectos_dropdown', 'value'),
-	Input('datos_year_rangeslider', 'value'),
-	Input('datos_month_rangeslider', 'value')
-	]
+    Output("menor_prod_vendidos", 'children'),
+    [Input('comp_prod_info', 'children')]
 )
-def menor_prod_cotizados(inmueble, etapa, proyecto, year_values, month_values):
-	if inmueble == 'Casa':
-			top = dm.get_prod_mas_cotizado_persona('cot', proyecto, etapa, q=5, ascending=True)
-	else:
-			top = dm.get_prod_mas_cotizado_persona('cot', proyecto, q=5, ascending=True)
-	
-	columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
-	table = df_to_table(top[columns])
-	return table
 
-@app.callback(
-	Output("menor_prod_negociados", 'children'),
-	[Input("inmuebles_dropdown", "value"),
-	Input("etapa_dropdown", "value"),
-	Input('proyectos_dropdown', 'value'),
-	Input('datos_year_rangeslider', 'value'),
-	Input('datos_month_rangeslider', 'value')
-	]
-)
-def menor_prod_negociados(inmueble, etapa, proyecto, year_values, month_values):
-	if inmueble == 'Casa':
-			top = dm.get_prod_mas_cotizado_persona('neg', proyecto, etapa, q=5, ascending=True)
-	else:
-			top = dm.get_prod_mas_cotizado_persona('neg', proyecto, q=5, ascending=True)
-	
-	columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
-	table = df_to_table(top[columns])
-	return table
-
-@app.callback(
-	Output("menor_prod_vendidos", 'children'),
-	[Input("inmuebles_dropdown", "value"),
-	Input("etapa_dropdown", "value"),
-	Input('proyectos_dropdown', 'value'),
-	Input('datos_year_rangeslider', 'value'),
-	Input('datos_month_rangeslider', 'value')
-	]
-)
-def menor_prod_negociados(inmueble, etapa, proyecto, year_values, month_values):
-	if inmueble == 'Casa':
-			top = dm.get_prod_mas_cotizado_persona('comp', proyecto, etapa, q=5, ascending=True)
-	else:
-			top = dm.get_prod_mas_cotizado_persona('comp', proyecto, q=5, ascending=True)
-	
-	columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
-	table = df_to_table(top[columns])
-	return table
+def prod_menor_vendido(jsondf):
+    df = pd.read_json(jsondf, orient='split')
+    df = df.sort_values(by='Nro Personas', ascending=True)
+    columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
+    return df_to_table(df[columns].head())
