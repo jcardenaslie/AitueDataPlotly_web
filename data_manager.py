@@ -277,27 +277,19 @@ def calc_nro_cotizaciones(data, inmueble=None, proyecto=None, year_values=None, 
 
 ##########################################################################################################################
 start_data = timeit.default_timer()
-cot_all = pd.read_csv('Data/cotizaciones_all_new.csv', index_col=[0])
-neg_all = pd.read_csv('Data/negocios_all_new.csv', index_col=[0])
+cot_all = pd.read_csv('Data/cotizaciones_all_new.csv', index_col=[0]) # 6968 KB
+neg_all = pd.read_csv('Data/negocios_all_new.csv', index_col=[0]) # 1179 KB
 
-productos = pd.read_csv('Data/productos.csv', index_col=[0], encoding = "ISO-8859-1")
+productos = pd.read_csv('Data/productos.csv', index_col=[0], encoding = "ISO-8859-1") # 1941 KB
 drop = ['SobrePrecio','Precio Lista', 'Precio Venta', 'Precio Esperado', 'Baños', 'Dormitorios', 'Cod Proyecto', 'Cod Etapa']
 productos.drop(drop, axis=1, inplace = True)
-# cot_productos_comp = pd.read_excel('Data/cot_productos_comp.xlsx')
-# cot_productos_cot = pd.read_excel('Data/cot_productos_cot.xlsx')
-# cot_productos_neg = pd.read_excel('Data/cot_productos_neg.xlsx')
-
-# cot_productos = {'cot':cot_productos_cot, 'neg': cot_productos_neg, 'comp':cot_productos_comp}
 stop_data = timeit.default_timer()
 print('END DATA LOAD','Time: ', stop_data - start_data)
 ##########################################################################################################################
 
 
 start_prod = timeit.default_timer()
-# cot_prod_info = calc_nro_cotizaciones('cot')
-# neg_prod_info = calc_nro_cotizaciones('neg')
-# comp_prod_info = calc_nro_cotizaciones('comp')
-# cot_productos = {'cot':cot_prod_info, 'neg': neg_prod_info, 'comp':comp_prod_info}
+
 
 stop_prod = timeit.default_timer()
 print('END DATA PROD INFO','Time: ', stop_prod - start_prod)
