@@ -463,3 +463,34 @@ def violin_plot(cot_all, neg_all):
         "layout" : layout
      }
     return fig
+
+def bar_period_chart2(periodo, df):
+    df = df.groupby([pd.Grouper(key='Fecha Cotizacion', freq=periodo), "Proyecto"]).count()
+
+    dates = df.index.get_level_values('Fecha Cotizacion').unique()
+    dates = [str(i) for i in dates]
+
+    proyectos = dm.df.Proyecto.unique().tolist()
+    data = []
+    for proyecto in proyectos:
+        proyecto_rows = []
+        for date in dates:
+            try:
+                row = df.loc[(date, proyecto)]
+                proyecto_rows.append(row['Medio'])
+            except Exception as e:
+                proyecto_rows.append(0)
+
+        data_trace = go.Bar(
+            x=dates, y=proyecto_rows, name=proyecto
+        )
+        data.append(data_trace)
+
+    layout = go.Layout(
+        barmode="stack",
+        margin=dict(l=40, r=25, b=40, t=0, pad=4),
+        paper_bgcolor="white",
+        plot_bgcolor="white",
+    )
+
+    return {"data": data, "layout": layout}

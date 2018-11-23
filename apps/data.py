@@ -16,7 +16,7 @@ from app import app, indicator, small_indicator, millify, df_to_table
 import data_manager as dm
 
 from datetime import datetime as dt
-from utils.figures import pie_chart, cases_by_period, bar_period_chart, categorical_columnbycolumn
+from utils.figures import pie_chart, cases_by_period, bar_period_chart2, categorical_columnbycolumn
 
 colors = {"background": "#F3F6FA", "background_div": "white"}
 
@@ -432,5 +432,5 @@ def data_period_callback(proyecto, periodo, data, year_values, month_values):
     tmp_data = dm.data_change(data)
     if proyecto != 'TP':
         tmp_data = tmp_data[tmp_data['Proyecto'] == proyecto]
-    return bar_period_chart(periodo, tmp_data)
+    return bar_period_chart2(periodo, tmp_data)
 
