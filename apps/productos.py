@@ -17,7 +17,7 @@ from utils.figures import bar_period_chart
 
 
 layout = [
-    html.Div([html.P("* Esta pestaña toma un tiempo en cargar")]),
+    html.Div([html.P("* Esta pestaña toma un tiempo en cargar", style={"color":'red'})]),
     # top controls
     html.Div(
             [
