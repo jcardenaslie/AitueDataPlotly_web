@@ -16,130 +16,7 @@ import data_manager as dm
 
 from datetime import datetime as dt
 import copy
-
-def line_plot(fechas, periodo):
-
-	entregado = fechas[(fechas['Estado'] == 'Entregado')]
-	escriturado = fechas[(fechas['Estado'] == 'Escriturado')]
-	reservado = fechas[(fechas['Estado'] == 'Reservado')]
-	promesado = fechas[(fechas['Estado'] == 'Promesado')]
-	anulado = fechas[(fechas['Estado'] == 'Anulada')]
-
-	entregado = entregado['Total Productos'].resample(periodo).sum()
-	escriturado = escriturado['Total Productos'].resample(periodo).sum()
-	reservado = reservado['Total Productos'].resample(periodo).sum()
-	promesado = promesado['Total Productos'].resample(periodo).sum()
-	anulado = anulado['Total Productos'].resample(periodo).sum()
-	
-	months = fechas.asfreq(periodo).index.month
-	years = fechas.asfreq(periodo).index.year
-	index = ["{}-{}".format(x,y) for x,y in zip(years,months)]
-	# index = pd.to_datetime(index)
-	
-	trace1 = go.Scatter(
-	    x = index,
-	    y = entregado,
-	    mode = 'lines+markers',
-	    name = 'Entregados'
-	)
-
-	trace2 = go.Scatter(
-	    x = index,
-	    y = reservado,
-	    mode = 'lines+markers',
-	    name = 'Resevado'
-	)
-
-	trace3 = go.Scatter(
-	    x = index,
-	    y = promesado,
-	    mode = 'lines+markers',
-	    name = 'Promesado'
-	)
-
-	trace4 = go.Scatter(
-	    x = index,
-	    y = escriturado,
-	    mode = 'lines+markers',
-	    name = 'Ecriturado'
-	)
-
-	trace5 = go.Scatter(
-	    x = index,
-	    y = anulado,
-	    mode = 'lines+markers',
-	    name = 'Anulado'
-	)
-
-	data = [trace1, trace2, trace3, trace4, trace5]
-
-	# Edit the layout
-	layout = dict(title = 'Total per {}'.format(periodo),
-	              xaxis = dict(title = periodo),
-	              yaxis = dict(title = 'Total (UF)'),
-	              margin=dict(l=60, r=25, b=40, t=0, pad=4),
-        paper_bgcolor="white",
-        plot_bgcolor="white",
-	              )
-
-	fig = dict(data=data, layout=layout)
-	return fig
-
-def violin_plot(cot_all, neg_all):
-	x = cot_all['Total Productos'].dropna()
-	z = neg_all['Total Productos'].dropna()
-	y = neg_all[(neg_all['Estado'] == 'Escriturado') | (neg_all['Estado'] == 'Entregado')]['Total Productos'].dropna()
-
-	trace1 = {
-	        "type": 'violin',
-	        "y": x,
-	        "name": 'Cotizaciones',
-	        "box": {
-	            "visible": True
-	        },
-	        "meanline": {
-	            "visible": True
-	        }
-	        }
-
-	trace2 = {
-	        "type": 'violin',
-	        "y": y,
-	        "name": 'Negocios',
-	        "box": {
-	            "visible": True
-	        },
-	        "meanline": {
-	            "visible": True
-	        }
-	        }
-
-	trace3 = {
-	        "type": 'violin',
-	        "y": y,
-	        "name": 'Ventas',
-	        "box": {
-	            "visible": True
-	        },
-	        "meanline": {
-	            "visible": True
-	        }
-	        }
-	
-	data = [trace1, trace2, trace3]
-	
-	layout = go.Layout(
-        xaxis=dict(showgrid=False),
-        margin=dict(l=35, r=25, b=23, t=20, pad=4),
-        paper_bgcolor="white",
-        plot_bgcolor="white",
-    )
-	
-	fig = {
-	    "data": data,
-	    "layout" : layout
-	 }
-	return fig
+from utils.figures import line_plot, violin_plot
 
 layout = [
 	# top controls
@@ -239,53 +116,105 @@ layout = [
             className="row",
             style={"marginBottom": "5"},
     ),
+
+    html.Div(className='row',style={"margin-bottom":'5px'}, children=[
+    	    html.Div(
+		    	html.Div(
+		    		className='six columns',
+			    	style={
+						    "border":"1px solid #C8D4E3",
+						    "border-radius": "3px",
+						    "background-color": "white",
+						    "height":"100px",
+						    "vertical-align":"middle",
+						    "text-align":"center",
+			    	},
+		    		children=[
+		    			html.P("Total Ventas (Unidades)", style={"font-size":"18px"}),
+		    			html.P("0", id='total_ventas_unidades', style={"color": "#2a3f5f","font-size": "40px"}),
+		    		],
+		    	),
+    		),
+    	    html.Div(
+		    	html.Div(
+		    		className='six columns',
+			    	style={
+						    "border":"1px solid #C8D4E3",
+						    "border-radius": "3px",
+						    "background-color": "white",
+						    "height":"100px",
+						    "vertical-align":"middle",
+						    "text-align":"center",
+			    	},
+		    		children=[
+		    			html.P("Total Ventas (UF)", style={"font-size":"18px"}),
+		    			html.P("0", id='total_ventas_uf', style={"color": "#2a3f5f","font-size": "40px"}),
+		    		],
+		    	),
+    		),
+    		
+   	]),
+
+
 	# Indicators
 	html.Div(className="row", children=[
-		html.Div(className='three columns',children=[
+		html.Div(className='two columns',children=[
             vertical_indicator(
 				"#00cc96",
-                "Total Promesas",
-                "total_promesa_indicator",
-            ),
-            vertical_indicator(
-				"#00cc96",
-                "Total Reservas",
-                "total_reserva_indicator",
+                "Total Entregas",
+                "total_entrega_indicator",
+                bg_color='#CAFFD8'
             ),
             vertical_indicator(
 				"#00cc96",
                 "Total Escrituras",
                 "total_escritura_indicator",
+                bg_color='#CFFEF0'
             ),
             vertical_indicator(
 				"#00cc96",
-                "Total Entregas",
-                "total_entrega_indicator",
+                "Total Reservas",
+                "total_reserva_indicator",
+                bg_color='#E1FFFE'
+            ),
+            vertical_indicator(
+				"#00cc96",
+                "Total Promesas",
+                "total_promesa_indicator",
+                bg_color='#E6FCFF'
             ),
 		]),
-		html.Div(className='three columns',children=[
+		html.Div(className='two columns',children=[
 			vertical_indicator(
 				"#00cc96",
-                "UF Promesas",
-                "uf_promesa_indicator",
-            ),
-            vertical_indicator(
-				"#00cc96",
-                "UF Reservas",
-                "uf_reserva_indicator",
+                "UF Entregas",
+                "uf_entrega_indicator",
+                bg_color='#CAFFD8'
             ),
             vertical_indicator(
 				"#00cc96",
                 "UF Escrituras",
                 "uf_escritura_indicator",
+                bg_color='#CFFEF0'
             ),
             vertical_indicator(
 				"#00cc96",
-                "UF Entregas",
-                "uf_entrega_indicator",
+                "UF Reservas",
+                "uf_reserva_indicator",
+                bg_color='#E1FFFE'
             ),
+			vertical_indicator(
+				"#00cc96",
+                "UF Promesas",
+                "uf_promesa_indicator",
+                bg_color='#E6FCFF'
+            ),
+
+            
+            
 		]),
-		html.Div(className='six columns',children=[
+
+		html.Div(className='eight columns',children=[
 			html.Div(
            [
             dcc.Graph(
@@ -294,7 +223,7 @@ layout = [
                 style={"height": "90%", "width": "98%"},
             ),
             
-           ],className="twelve columns chart_div",
+           ],className="row chart_div",
         ),
 			
 		]),
@@ -321,6 +250,9 @@ layout = [
 ]
 
 
+
+###################################################################################################
+#CONTROLES
 @app.callback(
     Output('ventas_proyectos_dropdown', 'options'),
     [
@@ -343,9 +275,8 @@ def etapa_dropdown_callback(inmueble, proyecto):
     else:
         return [{'label':'No disponible', 'value':None}] 
 
-
 # #####################################################################################
-
+# VIOLIN
 @app.callback(
 	Output("total_uf", 'figure'),
 	[Input('ventas_proyectos_dropdown', 'value'),
@@ -365,7 +296,7 @@ def total_uf_callback(proyecto, inmueble, etapa, year_values, month_values):
 
 	return violin_plot(cot_all, neg_all)
 
-
+#LINE
 @app.callback(
 	Output('ventas_uf_graph', 'figure'),
 	[Input('ventas_proyectos_dropdown', 'value'),
@@ -384,6 +315,7 @@ def ventas_uf_graph_callback(proyecto, inmueble, etapa, periodo, year_values, mo
 	return line_plot(fechas, periodo)
 
 ####################################################################
+# UNIDADES
 @app.callback(
 	Output('total_reserva_indicator', 'children'),
 	[Input('ventas_proyectos_dropdown', 'value'),
@@ -399,7 +331,6 @@ def total_reserva_callback(proyecto, inmueble, etapa, year_values, month_values)
 	else:
 		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values)
 
-	# fechas = dm.get_data_whithin_dates('neg', proyecto, etapa, year_values, month_values)
 	count = fechas[fechas['Estado']=='Reservado']['Estado'].count()
 	return count
 
@@ -449,8 +380,47 @@ def total_promesa_callback(proyecto, inmueble, etapa, year_values, month_values)
 	count = fechas[fechas['Estado']=='Promesado']['Estado'].count()
 	return count
 
+#######################################################################################################
+@app.callback(
+	Output("total_ventas_unidades", "children"),
+	[Input('ventas_proyectos_dropdown', 'value'),
+	Input('ventas_inmuebles_dropdown', 'value'),
+	Input('ventas_etapa_dropdown', 'value'),
+	Input('ventas_year_rangeslider', 'value'),
+	Input('ventas_month_rangeslider', 'value')]
+	)
+def total_ventas_uf(proyecto, inmueble, etapa, year_values, month_values):
+	if inmueble == 'Casa':
+		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values, etapa)
+	else:
+		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values)
+	escriturados_q = fechas[fechas['Estado']=='Escriturado']['Estado'].count()
+	entregados_q = fechas[fechas['Estado']=='Entregado']['Estado'].count()
+	count = escriturados_q + entregados_q 
+	return count
+
+@app.callback(
+	Output("total_ventas_uf", "children"),
+	[Input('ventas_proyectos_dropdown', 'value'),
+	Input('ventas_inmuebles_dropdown', 'value'),
+	Input('ventas_etapa_dropdown', 'value'),
+	Input('ventas_year_rangeslider', 'value'),
+	Input('ventas_month_rangeslider', 'value')]
+	)
+def total_ventas_uf(proyecto, inmueble, etapa, year_values, month_values):
+	if inmueble == 'Casa':
+		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values, etapa)
+	else:
+		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values)
+	
+	escriturados_q = fechas[fechas['Estado']=='Escriturado']['Total Productos'].sum()
+	entregados_q = fechas[fechas['Estado']=='Entregado']['Total Productos'].sum()
+	count = escriturados_q + entregados_q 
+	print(count)
+	return round(count,0)
 
 # #######################################################################
+# UF
 @app.callback(
 	Output('uf_reserva_indicator', 'children'),
 	[Input('ventas_proyectos_dropdown', 'value'),

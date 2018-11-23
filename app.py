@@ -65,7 +65,7 @@ def millify(n):
 
     return "{:.0f}{}".format(n / 10 ** (3 * millidx), millnames[millidx])
 #returns top indicator div
-def indicator(color, text, id_value):
+def indicator(color, text, id_value, bg_color='white'):
     return html.Div(
         [
             html.P(
@@ -77,7 +77,7 @@ def indicator(color, text, id_value):
                 className="indicator_value"
             ),
         ],
-        className="four columns indicator", 
+        className="four columns indicator", style={"background-color": bg_color}
     )
 
 def small_indicator(color, text, id_value):
@@ -96,12 +96,12 @@ def small_indicator(color, text, id_value):
         
     )
 
-def vertical_indicator(color, text, id_value):
+def vertical_indicator(color, text, id_value, bg_color='white'):
     return html.Div(
-        className='indicator',children=[
+        className='indicator', style={"background-color": bg_color},children=[
                 html.P( text, className='twelve columns indicator_text'),
                 html.P(id=id_value, className='indicator_value')
-    ]
+        ]
     )
 
 # if __name__ == '__main__':

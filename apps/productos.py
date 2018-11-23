@@ -13,100 +13,11 @@ from app import app, indicator, millify, df_to_table
 import data_manager as dm
 from datetime import datetime as dt
 import timeit
+from utils.figures import bar_period_chart
 
-def bar_stacked_graph(proyecto):
-    
-    proyecto = proyecto
-    products = dm.productos
-    prod_sdv = products[products.Proyecto == proyecto]
-	# prod_sdv.Etapa.unique()
-
-    top_labels = prod_sdv.Estado.unique()
-
-    y_data = prod_sdv.Etapa.unique()
-
-
-    x_data = []
-
-    for etapa in prod_sdv.Etapa.unique():
-	    p = prod_sdv[prod_sdv.Etapa == etapa]
-	    values = []
-	    for estado in prod_sdv.Estado.unique():
-	        per = p[p['Estado'] == estado]['Estado'].count()/p.shape[0]
-	        per = float(("%.2f"% per))
-	        values.append(per)
-	    x_data.append(values)
-
-    colors = ['rgba(38, 24, 74, 0.8)', 'rgba(71, 58, 131, 0.8)',
-	          'rgba(122, 120, 168, 0.8)', 'rgba(164, 163, 204, 0.85)',
-	          'rgba(190, 192, 213, 1)', 'rgb(210, 226, 241)','rgb(234, 232, 253)']
-
-
-    traces = []
-
-    for i in range(0, len(x_data[0])):
-	    j=1
-	    for xd, yd in zip(x_data, y_data):
-	        if j > 1: 
-	            sl = False
-	        else:
-	            sl=True
-	        j+=1
-	        traces.append(go.Bar(
-	            x=[xd[i]],
-	            y=[yd],
-	            orientation='h',
-	            marker=dict(
-	                color=colors[i],
-	                line=dict(
-	                        color='rgb(248, 248, 249)',
-	                        width=1)
-	            ),
-	            name = top_labels[i],
-	            showlegend=sl
-	        ))
-
-    layout = go.Layout(
-	    xaxis=dict(
-	        showgrid=False,
-	        showline=False,
-	        showticklabels=False,
-	        zeroline=False,
-	        domain=[0.15, 1]
-	    ),
-	    yaxis=dict(
-	        showgrid=False,
-	        showline=False,
-	        showticklabels=False,
-	        zeroline=False,
-	    ),
-	    barmode='stack',
-	    paper_bgcolor="white",
-        plot_bgcolor="white",
-	    # margin=dict(l=120,r=10,t=140,b=80),
-	    margin=dict(t=10, l=100, b=85, pad=4),
-	    showlegend=True,
-	    # legend=dict(orientation="h")
-	)
-
-    annotations = []
-
-    for yd, xd in zip(y_data, x_data):
-	    # labeling the y-axis
-	    annotations.append(dict(xref='paper', yref='y',
-	                            x=0.14, y=yd,
-	                            xanchor='right',
-	                            text=str(yd),
-	                            font=dict(family='Arial', size=14,
-	                                      color='rgb(67, 67, 67)'),
-	                            showarrow=False, align='right'))
-
-    layout['annotations'] = annotations
-
-    fig = go.Figure(data=traces, layout=layout)
-    return fig
 
 layout = [
+    html.Div([html.P("* Esta pestaña toma un tiempo en cargar")]),
     # top controls
     html.Div(
             [

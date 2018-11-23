@@ -8,7 +8,6 @@ from app import app
 
 from apps import data, versus, ventas, productos
 
-
 app.layout = html.Div(children=[
         # header
         html.Div([
@@ -31,7 +30,6 @@ app.layout = html.Div(children=[
                     dcc.Tab(label="Productos", value="prod_tab"),
                     dcc.Tab(id="data_tab", label="Datos", value="data_tab"),
                     dcc.Tab(label="Cotización vs Negocios", value="versus_tab"),
-                    
                 ],
                 value="ventas_tab",
             )
@@ -41,6 +39,7 @@ app.layout = html.Div(children=[
         
         html.Div(id="tab_content", className="row", style={"margin": "2% 3%"}),
         html.Link(href="/static/s4.css", rel="stylesheet"),
+        html.Link(href="/static/loading.css", rel="stylesheet"),
         html.Link(href="https://use.fontawesome.com/releases/v5.2.0/css/all.css",rel="stylesheet"),
         html.Link(href="https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css",rel="stylesheet"),
         html.Link(href="https://fonts.googleapis.com/css?family=Dosis", rel="stylesheet"),
@@ -73,6 +72,15 @@ def render_content(tab):
     else:
         pass
         # return opportunities.layout
+
+
+app.css.append_css({"external_url": "https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css 2"})
+# Dash CSS
+app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
+
+# Loading screen CSS
+# app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/brPBPO.css"})
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

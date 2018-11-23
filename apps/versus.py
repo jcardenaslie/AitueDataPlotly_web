@@ -12,165 +12,12 @@ from plotly import graph_objs as go
 from app import app, indicator, millify, df_to_table
 import data_manager as dm
 from datetime import datetime as dt
+from utils.figures import pie_chart, bar_period_chart, categorical_columnbycolumn
 
 colors = {"background": "#F3F6FA", "background_div": "white"}
 
-# returns pie chart based on filters values
-# column makes the fonction reusable 
-def pie_chart(df, column):
-
-    group = df.groupby(column).count()
-    labels = group.index
-    values = group.ID.tolist()
-
-    layout = go.Layout(
-        margin=dict(l=0, r=0, b=0, t=4, pad=8),
-        #legend=dict(orientation="h"),
-        paper_bgcolor="white",
-        plot_bgcolor="white",
-    )
-
-    trace = go.Pie(
-        labels=labels,
-        values=values,
-        marker={"colors": ["#264e86", "#0074e4", "#74dbef", "#eff0f4"]},
-    )
-
-    return {"data": [trace], "layout": layout}
-
-def bar_period_chart(period, proyecto):
-    cot_all = dm.data_change('cot')
-    neg_all = dm.data_change('neg')
-    comp_all = dm.data_change('comp')
-
-    if proyecto != 'TP':
-        cot_all = cot_all[cot_all['Proyecto'] == proyecto]
-        neg_all = neg_all[neg_all['Proyecto'] == proyecto]
-        comp_all = comp_all[comp_all['Proyecto'] == proyecto]
-
-    data = []
-    cot_all['count'] = 1
-    cot_all.set_index(pd.to_datetime(cot_all['Fecha Cotizacion']), inplace=True)
-    cot_fecha = cot_all.resample(period).sum()
-
-    y = cot_fecha['count'].tolist()
-    x = cot_fecha.index.tolist()
-
-    trace = go.Bar(
-	    x=x,
-	    y=y,
-	    name='Cotizaciones',
-	    marker=dict(
-	        color='rgb(55, 83, 109)'
-	    )
-    )
-
-    data.append(trace)
-
-    neg_all['count'] = 1
-    neg_all.set_index(pd.to_datetime(neg_all['Fecha Cotizacion']), inplace=True)
-    neg_fecha = neg_all.resample(period).sum()
-
-    y = neg_fecha['count'].tolist()
-    x = neg_fecha.index.tolist()
-
-    trace = go.Bar(
-	    x=x,
-	    y=y,
-	    name='Negocios',
-	    marker=dict(
-	        color='rgb(26, 118, 255)'
-	    )
-    )
-
-    data.append(trace)
-
-    comp_all['count'] = 1
-    comp_all.set_index(pd.to_datetime(comp_all['Fecha Cotizacion']), inplace=True)
-    comp_fecha = comp_all.resample(period).sum()
-
-    y = comp_fecha['count'].tolist()
-    x = comp_fecha.index.tolist()
-
-    trace = go.Bar(
-        x=x,
-        y=y,
-        name='Negocios',
-        marker=dict(
-            color='rgb(122, 234, 255)'
-        )
-    )
-
-    data.append(trace)
-
-    layout = go.Layout(
-	#         barmode="stack",
-	        margin=dict(l=40, r=25, b=40, t=0, pad=4),
-	        paper_bgcolor="white",
-	        plot_bgcolor="white",
-	    )
-
-    return {"data": data, "layout": layout}
-
-def categorical_columnbycolumn(column1, column2, df):
-    col1 = column1
-    col2 = column2
-    col1_labels = df[col1].unique().tolist()
-    col2_labels = df[col2].unique().tolist()
-
-    values = []  # list of lists
-
-    for value2 in col2_labels:
-        col_values = []
-        for value1 in col1_labels:
-            col_values.append(dm.df[(dm.df[col1] == value1) & (dm.df[col2] == value2)]['ID'].count())
-        values.append(col_values)
-
-    traces = []
-
-    for l in range(0, len(values)):
-        trace = go.Bar(
-            x=col1_labels,
-            y=values[l],
-            name=col2_labels[l]
-        )
-        traces.append(trace)
-
-    data = traces
-    layout = go.Layout(
-        margin=dict(l=40, r=25, b=40, t=0, pad=4),
-        xaxis=dict(
-            tickfont=dict(
-                size=10,
-                color='rgb(107, 107, 107)'
-            )
-        ),
-        yaxis=dict(
-            # title='# Cotizaciones',
-            titlefont=dict(
-                size=16,
-                color='rgb(107, 107, 107)'
-            ),
-            tickfont=dict(
-                size=14,
-                color='rgb(107, 107, 107)'
-            )
-        ),
-        legend=dict(
-            x=1.2,
-            y=1.0,
-            bgcolor='rgba(255, 255, 255, 0)',
-            bordercolor='rgba(255, 255, 255, 0)',
-            font=dict(size=12)
-        ),
-        barmode='stack',
-        bargap=0.15,
-        bargroupgap=0.1
-    )
-    return {'data':data, 'layout':layout}
-
-
 layout = [
+    html.Div(id='test-div', style={'display': 'none'}),
     # top controls
     html.Div(
             [
@@ -420,6 +267,18 @@ layout = [
         style={"marginTop": "5px"},
     ),
 ]
+
+#Queda mal con el loading, se loopea
+# @app.callback(
+#     Output('test-div', 'children'),
+#     [Input('comp_graph1', 'hoverData')])
+# def display_click_data(hoverData):
+#     print(json.dumps(hoverData, indent=2))
+#     return 0
+
+
+################################################################################################
+
 
 ######################################################################################################
 # Grafico de Pie
