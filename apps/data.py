@@ -259,7 +259,6 @@ layout = [
 @app.callback(
     Output('proyectos_dropdown', 'options'),
     [
-    # Input('data_dropdown', 'children'),
     Input('data_dropdown', 'value'),
     Input('inmuebles_dropdown', 'value')]
     )
@@ -271,7 +270,6 @@ def inmuebles_dropdown_callback(data, inmueble):
 @app.callback(
     Output('etapa_dropdown', 'options'),
     [
-    # Input('data_dropdown', 'children'),
     Input('data_dropdown', 'value'),
     Input('inmuebles_dropdown', 'value'),
     Input('proyectos_dropdown', 'value')]

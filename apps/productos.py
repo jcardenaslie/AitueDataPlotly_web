@@ -17,7 +17,7 @@ from utils.figures import bar_period_chart
 
 
 layout = [
-    html.Div([html.P("* Esta pestaña toma un tiempo en cargar", style={"color":'red'})]),
+    html.Div([html.P("* Esta pestaña toma tiempo en cargar", style={"color":'red'})]),
     # top controls
     html.Div(
             [
@@ -69,6 +69,23 @@ layout = [
                                     clearable=False,
                                 ),
                             )
+                            ]
+                            ,className='row')
+                        ,className='two columns'
+                    ),
+                ),
+                # Proyecto & Etapa
+                html.Div(
+                    html.Div(
+                        html.Div(
+                            [
+                            html.P("Producto:"),
+                            dcc.Dropdown(
+                                id="productos_dropdown",
+                                options=dm.productos_options,
+                                value="TP",
+                                clearable=False,
+                            ),
                             ]
                             ,className='row')
                         ,className='two columns'
@@ -345,63 +362,12 @@ layout = [
     html.Div(id="comp_prod_info", style={"display": "none"},),
 ]
 
-@app.callback(
-    Output('cot_prod_info', 'children'),
-    [Input("inmuebles_dropdown", "value"),
-    Input("etapa_dropdown", "value"),
-    Input('proyectos_dropdown', 'value'),
-    Input('datos_year_rangeslider', 'value'),
-    Input('datos_month_rangeslider', 'value')]
-)
-def calculate_productos_cot(inmueble, etapa, proyecto, year_values, month_values):
-    if inmueble == 'Casa':
-        df = dm.calc_nro_cotizaciones('cot', inmueble, proyecto, year_values, month_values, etapa=etapa)
-    else:
-        df = dm.calc_nro_cotizaciones('cot', inmueble, proyecto, year_values, month_values)
-    # print(df.head())
-    return df.to_json(date_format='iso', orient='split')
-
-@app.callback(
-    Output('neg_prod_info', 'children'),
-    [Input("inmuebles_dropdown", "value"),
-    Input("etapa_dropdown", "value"),
-    Input('proyectos_dropdown', 'value'),
-    Input('datos_year_rangeslider', 'value'),
-    Input('datos_month_rangeslider', 'value')]
-)
-def calculate_productos_neg(inmueble, etapa, proyecto, year_values, month_values):
-    start = timeit.default_timer()
-    
-    if inmueble == 'Casa':
-        df = dm.calc_nro_cotizaciones('neg', inmueble, proyecto, year_values, month_values, etapa=etapa)
-    else:
-        df = dm.calc_nro_cotizaciones('neg', inmueble, proyecto, year_values, month_values)
-    stop = timeit.default_timer()
-    print('END PROD CALCULATION','Time: ', stop - start)
-    # print(df.head())
-    return df.to_json(date_format='iso', orient='split')
-
-@app.callback(
-    Output('comp_prod_info', 'children'),
-    [Input("inmuebles_dropdown", "value"),
-    Input("etapa_dropdown", "value"),
-    Input('proyectos_dropdown', 'value'),
-    Input('datos_year_rangeslider', 'value'),
-    Input('datos_month_rangeslider', 'value')]
-)
-def calculate_productos_comp(inmueble, etapa, proyecto, year_values, month_values):
-    if inmueble == 'Casa':
-        df = dm.calc_nro_cotizaciones('comp', inmueble, proyecto, year_values, month_values, etapa=etapa)
-    else:
-        df = dm.calc_nro_cotizaciones('comp', inmueble, proyecto, year_values, month_values)
-    # print(df.head())
-    return df.to_json(date_format='iso', orient='split')
 
 ##############################################################################################################
 @app.callback(
-	Output("prueba", 'children'),
-	[
-	Input('proyectos_dropdown', 'value'),
+    Output("prueba", 'children'),
+    [
+    Input('proyectos_dropdown', 'value'),
     ]
 )
 def etapa_bar_stacked_callback(proyecto,):
@@ -421,9 +387,67 @@ def etapa_bar_stacked_callback(proyecto,):
         return children
     else:
         return []
-    # return bar_stacked_graph(proyecto)
 
-#############################################################################################
+##############################################################################################################
+# CALCULO DATAFRAMES INTERMEDIOS
+@app.callback(
+    Output('cot_prod_info', 'children'),
+    [Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value'),
+    Input('productos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')]
+)
+def calculate_productos_cot(inmueble, etapa, proyecto, producto, year_values, month_values):
+    if inmueble == 'Casa':
+        df = dm.calc_nro_cotizaciones('cot', inmueble, proyecto, producto, year_values, month_values, etapa=etapa)
+    else:
+        df = dm.calc_nro_cotizaciones('cot', inmueble, proyecto, producto, year_values, month_values)
+    # print(df.head())
+    return df.to_json(date_format='iso', orient='split')
+
+@app.callback(
+    Output('neg_prod_info', 'children'),
+    [Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value'),
+    Input('productos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')]
+)
+def calculate_productos_neg(inmueble, etapa, proyecto, producto, year_values, month_values):
+    start = timeit.default_timer()
+    
+    if inmueble == 'Casa':
+        df = dm.calc_nro_cotizaciones('neg', inmueble, proyecto, producto, year_values, month_values, etapa=etapa)
+    else:
+        df = dm.calc_nro_cotizaciones('neg', inmueble, proyecto, producto, year_values, month_values)
+    stop = timeit.default_timer()
+    print('END PROD CALCULATION','Time: ', stop - start)
+    # print(df.head())
+    return df.to_json(date_format='iso', orient='split')
+
+@app.callback(
+    Output('comp_prod_info', 'children'),
+    [Input("inmuebles_dropdown", "value"),
+    Input("etapa_dropdown", "value"),
+    Input('proyectos_dropdown', 'value'),
+    Input('productos_dropdown', 'value'),
+    Input('datos_year_rangeslider', 'value'),
+    Input('datos_month_rangeslider', 'value')]
+)
+def calculate_productos_comp(inmueble, etapa, proyecto, producto, year_values, month_values):
+    if inmueble == 'Casa':
+        df = dm.calc_nro_cotizaciones('comp', inmueble, proyecto, producto, year_values, month_values, etapa=etapa)
+    else:
+        df = dm.calc_nro_cotizaciones('comp', inmueble, proyecto, producto, year_values, month_values)
+    # print(df.head())
+    return df.to_json(date_format='iso', orient='split')
+
+
+###########################################################################################################################################################################################################
+# INDICADTORES MAYOR PRODUCTO
 @app.callback(
 	Output("prod_mas_cotizado", 'children'),
 	[Input('cot_prod_info', 'children')]
@@ -452,6 +476,7 @@ def prod_mas_vendido(jsondf):
     return df.Programa.head(1)
 
 # ############################################################################################
+# TABLAS MAYOR PRODUCTO
 @app.callback(
     Output("top_prod_cotizados", 'children'),
     [Input('cot_prod_info', 'children')]
@@ -459,7 +484,7 @@ def prod_mas_vendido(jsondf):
 
 def prod_mas_cotizado(jsondf):
     df = pd.read_json(jsondf, orient='split')
-    columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
+    columns = ['Etapa','Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
     return df_to_table(df[columns].head())
 
 @app.callback(
@@ -469,7 +494,7 @@ def prod_mas_cotizado(jsondf):
 
 def prod_mas_negociado(jsondf):
     df = pd.read_json(jsondf, orient='split')
-    columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
+    columns = ['Etapa','Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
     return df_to_table(df[columns].head())
 
 @app.callback(
@@ -479,10 +504,11 @@ def prod_mas_negociado(jsondf):
 
 def prod_mas_vendido(jsondf):
     df = pd.read_json(jsondf, orient='split')
-    columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
+    columns = ['Etapa','Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
     return df_to_table(df[columns].head())
 
 #############################################################################################
+# INDICADORES MENOR PRODUCTO
 @app.callback(
     Output("prod_menos_cotizado", 'children'),
     [Input('cot_prod_info', 'children')]
@@ -511,6 +537,7 @@ def prod_menos_vendido(jsondf):
     return df.Programa.head(1)
 
 # ############################################################################################
+# TABLAS MENOR PRODUCTO
 @app.callback(
     Output("menor_prod_cotizados", 'children'),
     [Input('cot_prod_info', 'children')]
@@ -519,7 +546,7 @@ def prod_menos_vendido(jsondf):
 def prod_menor_cotizado(jsondf):
     df = pd.read_json(jsondf, orient='split')
     df = df.sort_values(by='Nro Personas', ascending=True)
-    columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
+    columns = ['Etapa','Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
     return df_to_table(df[columns].head())
 
 @app.callback(
@@ -530,7 +557,7 @@ def prod_menor_cotizado(jsondf):
 def prod_menor_negociado(jsondf):
     df = pd.read_json(jsondf, orient='split')
     df = df.sort_values(by='Nro Personas', ascending=True)
-    columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
+    columns = ['Etapa','Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
     return df_to_table(df[columns].head())
 
 @app.callback(
@@ -541,5 +568,5 @@ def prod_menor_negociado(jsondf):
 def prod_menor_vendido(jsondf):
     df = pd.read_json(jsondf, orient='split')
     df = df.sort_values(by='Nro Personas', ascending=True)
-    columns = ['Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
+    columns = ['Etapa','Numero Unidad', 'Nombre', 'Estado', 'Programa', 'Nro Personas']
     return df_to_table(df[columns].head())

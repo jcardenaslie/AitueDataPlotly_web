@@ -173,16 +173,18 @@ layout = [
             ),
             vertical_indicator(
 				"#00cc96",
-                "Total Reservas",
-                "total_reserva_indicator",
+                "Total Promesas",
+                "total_promesa_indicator",
                 bg_color='#E1FFFE'
+                
             ),
             vertical_indicator(
 				"#00cc96",
-                "Total Promesas",
-                "total_promesa_indicator",
+                "Total Reservas",
+                "total_reserva_indicator",
                 bg_color='#E6FCFF'
             ),
+            
 		]),
 		html.Div(className='two columns',children=[
 			vertical_indicator(
@@ -199,19 +201,17 @@ layout = [
             ),
             vertical_indicator(
 				"#00cc96",
-                "UF Reservas",
-                "uf_reserva_indicator",
-                bg_color='#E1FFFE'
-            ),
-			vertical_indicator(
-				"#00cc96",
                 "UF Promesas",
                 "uf_promesa_indicator",
+                bg_color='#E1FFFE'
+                
+            ),
+            vertical_indicator(
+				"#00cc96",
+                "UF Reservas",
+                "uf_reserva_indicator",
                 bg_color='#E6FCFF'
             ),
-
-            
-            
 		]),
 
 		html.Div(className='eight columns',children=[
@@ -251,7 +251,7 @@ layout = [
 
 
 
-###################################################################################################
+#########################################################################################################################################
 #CONTROLES
 @app.callback(
     Output('ventas_proyectos_dropdown', 'options'),
@@ -275,7 +275,58 @@ def etapa_dropdown_callback(inmueble, proyecto):
     else:
         return [{'label':'No disponible', 'value':None}] 
 
-# #####################################################################################
+##############################################################################################################################################################
+@app.callback(
+	Output("total_ventas_unidades", "children"),
+	[Input('ventas_proyectos_dropdown', 'value'),
+	Input('ventas_inmuebles_dropdown', 'value'),
+	Input('ventas_etapa_dropdown', 'value'),
+	Input('ventas_year_rangeslider', 'value'),
+	Input('ventas_month_rangeslider', 'value')]
+	)
+def total_ventas_uf(proyecto, inmueble, etapa, year_values, month_values):
+	if inmueble == 'Casa':
+		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values, etapa)
+	else:
+		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values)
+	escriturados_q = fechas[fechas['Estado']=='Escriturado']['Estado'].count()
+	entregados_q = fechas[fechas['Estado']=='Entregado']['Estado'].count()
+	count = escriturados_q + entregados_q 
+	return count
+
+@app.callback(
+	Output("total_ventas_uf", "children"),
+	[Input('ventas_proyectos_dropdown', 'value'),
+	Input('ventas_inmuebles_dropdown', 'value'),
+	Input('ventas_etapa_dropdown', 'value'),
+	Input('ventas_year_rangeslider', 'value'),
+	Input('ventas_month_rangeslider', 'value')]
+	)
+def total_ventas_uf(proyecto, inmueble, etapa, year_values, month_values):
+	if inmueble == 'Casa':
+		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values, etapa)
+	else:
+		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values)
+	
+	escriturados_q = fechas[fechas['Estado']=='Escriturado']['Total Productos'].sum()
+	entregados_q = fechas[fechas['Estado']=='Entregado']['Total Productos'].sum()
+	promesados_q = fechas[fechas['Estado']=='Promesado']['Total Productos'].sum()*0.1
+	count = escriturados_q + entregados_q + promesados_q
+	
+	# FORMAT NUMBERS
+	count = round(count,0)
+	count = str(count).strip('.')[:-2][::-1]
+	new_count = []
+	for i in range(len(count)):
+		if i % 3 == 0 and i != 0:
+			new_count.append('.')
+		new_count.append(count[i])
+	
+	new_count = new_count[::-1]
+	
+	return "".join(new_count)
+
+# ########################################################################################################################################
 # VIOLIN
 @app.callback(
 	Output("total_uf", 'figure'),
@@ -314,7 +365,7 @@ def ventas_uf_graph_callback(proyecto, inmueble, etapa, periodo, year_values, mo
 
 	return line_plot(fechas, periodo)
 
-####################################################################
+########################################################################################################################################
 # UNIDADES
 @app.callback(
 	Output('total_reserva_indicator', 'children'),
@@ -380,44 +431,6 @@ def total_promesa_callback(proyecto, inmueble, etapa, year_values, month_values)
 	count = fechas[fechas['Estado']=='Promesado']['Estado'].count()
 	return count
 
-#######################################################################################################
-@app.callback(
-	Output("total_ventas_unidades", "children"),
-	[Input('ventas_proyectos_dropdown', 'value'),
-	Input('ventas_inmuebles_dropdown', 'value'),
-	Input('ventas_etapa_dropdown', 'value'),
-	Input('ventas_year_rangeslider', 'value'),
-	Input('ventas_month_rangeslider', 'value')]
-	)
-def total_ventas_uf(proyecto, inmueble, etapa, year_values, month_values):
-	if inmueble == 'Casa':
-		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values, etapa)
-	else:
-		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values)
-	escriturados_q = fechas[fechas['Estado']=='Escriturado']['Estado'].count()
-	entregados_q = fechas[fechas['Estado']=='Entregado']['Estado'].count()
-	count = escriturados_q + entregados_q 
-	return count
-
-@app.callback(
-	Output("total_ventas_uf", "children"),
-	[Input('ventas_proyectos_dropdown', 'value'),
-	Input('ventas_inmuebles_dropdown', 'value'),
-	Input('ventas_etapa_dropdown', 'value'),
-	Input('ventas_year_rangeslider', 'value'),
-	Input('ventas_month_rangeslider', 'value')]
-	)
-def total_ventas_uf(proyecto, inmueble, etapa, year_values, month_values):
-	if inmueble == 'Casa':
-		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values, etapa)
-	else:
-		fechas = dm.get_data_whithin_dates('neg', proyecto, inmueble, year_values, month_values)
-	
-	escriturados_q = fechas[fechas['Estado']=='Escriturado']['Total Productos'].sum()
-	entregados_q = fechas[fechas['Estado']=='Entregado']['Total Productos'].sum()
-	count = escriturados_q + entregados_q 
-	print(count)
-	return round(count,0)
 
 # #######################################################################
 # UF
